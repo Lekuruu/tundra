@@ -1,0 +1,4 @@
+eval_type_backport==0.1.3
+python-dotenv==1.0.1
+fastapi==0.110.1
+uvicorn==0.29.0
