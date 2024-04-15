@@ -13,4 +13,5 @@ POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
 WEB_HOST = os.environ.get('WEB_HOST')
 WEB_PORT = int(os.environ.get('WEB_PORT', 80))
 
+STATIC_KEY = os.environ.get('STATIC_KEY', 'houdini')
 DEBUG = os.environ.get('DEBUG', 'false').lower() == 'true'
