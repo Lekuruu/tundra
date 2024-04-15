@@ -332,3 +332,42 @@ class PenguinItem(Base):
     def __init__(self, penguin_id: int, item_id: int):
         self.penguin_id = penguin_id
         self.item_id = item_id
+
+class BuddyList(Base):
+    __tablename__ = 'buddy_list'
+
+    penguin_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                           nullable=False)
+    buddy_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                         nullable=False, index=True)
+    best_buddy = Column(Boolean, nullable=False, server_default=text("false"))
+
+class BuddyRequest(Base):
+    __tablename__ = 'buddy_request'
+    penguin_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                           nullable=False)
+    requester_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                             nullable=False)
+
+class IgnoreList(Base):
+    __tablename__ = 'ignore_list'
+    penguin_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                           nullable=False)
+    ignore_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                          nullable=False, index=True)
+
+class Character(Base):
+    __tablename__ = 'character'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), nullable=False)
+    gift_id = Column(ForeignKey('item.id', ondelete='CASCADE', onupdate='CASCADE'))
+    stamp_id = Column(ForeignKey('stamp.id', ondelete='CASCADE', onupdate='CASCADE'))
+
+class CharacterBuddy(Base):
+    __tablename__ = 'character_buddy'
+    penguin_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                           nullable=False)
+    character_id = Column(ForeignKey('character.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                             nullable=False)
+    best_buddy = Column(Boolean, nullable=False, server_default=text("false"))
