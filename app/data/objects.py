@@ -371,3 +371,24 @@ class CharacterBuddy(Base):
     character_id = Column(ForeignKey('character.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
                              nullable=False)
     best_buddy = Column(Boolean, nullable=False, server_default=text("false"))
+
+class Postcard(Base):
+    __tablename__ = 'postcard'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    cost = Column(Integer, nullable=False, server_default=text("10"))
+    enabled = Column(Boolean, nullable=False, server_default=text("false"))
+
+class PenguinPostcard(Base):
+    __tablename__ = 'penguin_postcard'
+
+    id = Column(Integer, primary_key=True,
+                   server_default=text("nextval('\"penguin_postcard_id_seq\"'::regclass)"))
+    penguin_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
+                           index=True)
+    sender_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    postcard_id = Column(ForeignKey('postcard.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    send_date = Column(DateTime, nullable=False, server_default=text("now()"))
+    details = Column(String(255), nullable=False, server_default=text("''::character varying"))
+    has_read = Column(Boolean, nullable=False, server_default=text("false"))
