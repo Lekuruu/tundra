@@ -119,6 +119,18 @@ class Penguin(Base):
     rejection_de = Column(Boolean, nullable=False, server_default=text("false"))
     rejection_ru = Column(Boolean, nullable=False, server_default=text("false"))
 
+    @property
+    def is_authenticated(self) -> bool:
+        return True
+
+    @property
+    def display_name(self) -> str:
+        return self.nickname
+
+    @property
+    def identity(self) -> int:
+        return self.id
+
 class Card(Base):
     __tablename__ = 'card'
 
