@@ -1,5 +1,6 @@
 
 from __future__ import annotations
+from typing import List
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -14,13 +15,13 @@ def fetch_buddy_list(penguin_id: int, session: Session = ...) -> BuddyList:
         .first()
 
 @session_wrapper
-def fetch_buddy_requests(penguin_id: int, session: Session = ...) -> list[BuddyRequest]:
+def fetch_buddy_requests(penguin_id: int, session: Session = ...) -> List[BuddyRequest]:
     return session.query(BuddyRequest) \
         .filter(BuddyRequest.penguin_id == penguin_id) \
         .all()
 
 @session_wrapper
-def fetch_ignore_list(penguin_id: int, session: Session = ...) -> list[BuddyList]:
+def fetch_ignore_list(penguin_id: int, session: Session = ...) -> List[BuddyList]:
     return session.query(IgnoreList) \
         .filter(IgnoreList.penguin_id == penguin_id) \
         .all()
