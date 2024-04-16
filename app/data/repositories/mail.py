@@ -9,6 +9,13 @@ from ..objects import PenguinPostcard
 from .wrapper import session_wrapper
 
 @session_wrapper
+def create(data: dict, session: Session = ...) -> PenguinPostcard:
+    postcard = PenguinPostcard(**data)
+    session.add(postcard)
+    session.commit()
+    return postcard
+
+@session_wrapper
 def fetch_by_id(mail_id: int, session: Session = ...) -> PenguinPostcard | None:
     return session.query(PenguinPostcard) \
         .filter(PenguinPostcard.id == mail_id) \

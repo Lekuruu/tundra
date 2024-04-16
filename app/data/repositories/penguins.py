@@ -8,6 +8,13 @@ from .wrapper import session_wrapper
 from ..objects import Penguin
 
 @session_wrapper
+def create(data: dict, session: Session = ...) -> Penguin:
+    penguin = Penguin(**data)
+    session.add(penguin)
+    session.commit()
+    return penguin
+
+@session_wrapper
 def fetch_by_id(id: int, session: Session = ...) -> Penguin | None:
     return session.query(Penguin) \
         .filter(Penguin.id == id) \
