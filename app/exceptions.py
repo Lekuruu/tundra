@@ -13,7 +13,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         ResponseError(
             ErrorResponse=ErrorResponseObject(
                 errorCode=400,
-                errorMessage='Invalid request'
+                message='Invalid request'
             )
         ).model_dump(),
         status_code=400
@@ -25,7 +25,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         ResponseError(
             ErrorResponse=ErrorResponseObject(
                 errorCode=exc.status_code,
-                errorMessage=exc.detail
+                message=exc.detail
             )
         ).model_dump(),
         status_code=exc.status_code
