@@ -1,11 +1,34 @@
 
+from app.data import Penguin
 from typing import Union
 
 from secrets import token_hex
 from hashlib import md5
 
+import config
+import time
+import jwt
+
 def generate_random_key():
     return token_hex(8)
+
+def generate_token(user: Penguin) -> str:
+    return jwt.encode(
+        {
+            'sub': user.id,
+            'name': user.username,
+            'iat': round(time.time()),
+        },
+        config.STATIC_KEY,
+        algorithm='HS256'
+    )
+
+def decode_token(token: str) -> dict:
+    return jwt.decode(
+        token,
+        config.STATIC_KEY,
+        algorithms=['HS256']
+    )
 
 def get_hash(undigested: Union[str, int, bytes]) -> str:
     if type(undigested) == str:
