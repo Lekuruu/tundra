@@ -16,11 +16,11 @@ class Account(BaseModel):
     PendingActivation: bool
     SafeMode: bool
     Recurring: bool
-    DaysLeft: int | None
-    DaysAsMember: int | None
-    BadgeLevel: int | None
-    Overriden: bool | None
-    OverrideType: str
+    OverrideType: str = ""
+    DaysLeft: int | None = None
+    DaysAsMember: int | None = None
+    BadgeLevel: int | None = None
+    Overriden: bool | None = None
 
 class AuthData(BaseModel):
     PlayerId: int
@@ -33,7 +33,7 @@ class AuthData(BaseModel):
     PendingActivation: bool
     SaveMode: bool
     AccountType: str
-    DaysLeft: int | None
+    DaysLeft: int | None = None
 
 class Identity(BaseModel):
     PlayerId: int
