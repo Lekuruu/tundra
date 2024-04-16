@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Tuple
 
-from starlette.authentication import AuthenticationBackend, AuthCredentials
+from starlette.authentication import AuthenticationBackend, AuthCredentials, UnauthenticatedUser
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.exceptions import HTTPException
 from starlette.requests import HTTPConnection
@@ -32,8 +32,10 @@ class AuthBackend(AuthenticationBackend):
         if cello_token not in CELLOPHANE_TOKENS.values():
             return
 
+        scopes = ['application']
+
         if 'Basic' not in authorizations:
-            return
+            return AuthCredentials(scopes), UnauthenticatedUser()
 
         data, password = self.parse_basic_authentication(
             authorizations['Basic']
@@ -41,10 +43,24 @@ class AuthBackend(AuthenticationBackend):
 
         if not password:
             # No password was given, so we assume the data is a token
-            return await self.token_authentication(data)
+            user = await self.token_authentication(data)
 
-        # Authenticate client using username & password
-        return await self.password_authentication(data, password)
+        else:
+            # Authenticate client using username & password
+            user = await self.password_authentication(data, password)
+
+        if not user:
+            return AuthCredentials(scopes), UnauthenticatedUser()
+
+        scopes.append('authenticated')
+
+        if user.active:
+            scopes.append('activated')
+
+        if user.moderator:
+            scopes.append('moderator')
+
+        return AuthCredentials(scopes), user
 
     async def password_authentication(self, username: str, password: str) -> Penguin | None:
         loop = asyncio.get_event_loop()
@@ -70,16 +86,7 @@ class AuthBackend(AuthenticationBackend):
         if not password_correct:
             return
 
-        scopes=['authenticated']
-
-        if penguin.active:
-            scopes.append('active')
-
-        if penguin.moderator:
-            scopes.append('moderator')
-
-        # TODO: Ban & Member scopes
-        return AuthCredentials(scopes), penguin
+        return penguin
 
     async def token_authentication(self, token: str) -> Penguin | None:
         data = crypto.decode_token(token)
@@ -96,16 +103,7 @@ class AuthBackend(AuthenticationBackend):
         if not penguin:
             return
 
-        scopes=['authenticated']
-
-        if penguin.active:
-            scopes.append('active')
-
-        if penguin.moderator:
-            scopes.append('moderator')
-
-        # TODO: Ban & Member scopes
-        return AuthCredentials(scopes), penguin
+        return penguin
 
     def parse_authorization_header(self, header: str) -> dict:
         try:
