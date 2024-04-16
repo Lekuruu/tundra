@@ -6,3 +6,4 @@ from . import routes
 from . import exceptions
 
 from .app import api, run
+from . import middleware
