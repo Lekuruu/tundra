@@ -24,11 +24,18 @@ def generate_token(user: Penguin) -> str:
     )
 
 def decode_token(token: str) -> dict:
-    return jwt.decode(
+    data = jwt.decode(
         token,
         config.STATIC_KEY,
         algorithms=['HS256']
     )
+
+    for field in ('sub', 'name', 'iat'):
+        if field not in data:
+            return
+
+    # TODO: Token expiration
+    return data
 
 def get_hash(undigested: Union[str, int, bytes]) -> str:
     if type(undigested) == str:
