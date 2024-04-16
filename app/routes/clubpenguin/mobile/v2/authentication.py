@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get('/authToken')
 @requires('authenticated')
-def authtoken_request(request: Request):
+def authtoken(request: Request):
     user: Penguin = request.user
 
     # Default login time
