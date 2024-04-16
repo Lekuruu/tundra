@@ -131,6 +131,15 @@ class Penguin(Base):
     def identity(self) -> int:
         return self.id
 
+class Login(Base):
+    __tablename__ = 'login'
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('\"login_id_seq\"'::regclass)"))
+    penguin_id = Column(ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    date = Column(DateTime, nullable=False, server_default=text("now()"))
+    ip_hash = Column(CHAR(255), nullable=False)
+    minutes_played = Column(Integer, nullable=False, server_default=text("0"))
+
 class Card(Base):
     __tablename__ = 'card'
 
