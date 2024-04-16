@@ -15,7 +15,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
                 errorCode=400,
                 errorMessage='Invalid request'
             )
-        ).model_dump()
+        ).model_dump(),
+        status_code=400
     )
 
 @api.exception_handler(HTTPException)
@@ -26,7 +27,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
                 errorCode=exc.status_code,
                 errorMessage=exc.detail
             )
-        ).model_dump()
+        ).model_dump(),
+        status_code=exc.status_code
     )
 
 @api.exception_handler(StarletteHTTPException)
@@ -37,5 +39,6 @@ async def starlette_exception_handler(request: Request, exc: StarletteHTTPExcept
                 errorCode=exc.status_code,
                 message=exc.detail
             )
-        ).model_dump()
+        ).model_dump(),
+        status_code=exc.status_code
     )
