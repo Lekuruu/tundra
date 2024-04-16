@@ -81,8 +81,31 @@ class AuthBackend(AuthenticationBackend):
         # TODO: Ban & Member scopes
         return AuthCredentials(scopes), penguin
 
-    async def token_authentication(token: str) -> Penguin | None:
-        ... # TODO
+    async def token_authentication(self, token: str) -> Penguin | None:
+        data = crypto.decode_token(token)
+
+        if not data:
+            return
+
+        loop = asyncio.get_event_loop()
+
+        penguin = await loop.run_in_executor(
+            None, penguins.fetch_by_id, data['sub']
+        )
+
+        if not penguin:
+            return
+
+        scopes=['authenticated']
+
+        if penguin.active:
+            scopes.append('active')
+
+        if penguin.moderator:
+            scopes.append('moderator')
+
+        # TODO: Ban & Member scopes
+        return AuthCredentials(scopes), penguin
 
     def parse_authorization_header(self, header: str) -> dict:
         try:
