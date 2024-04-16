@@ -122,10 +122,4 @@ class AuthBackend(AuthenticationBackend):
     def parse_basic_authentication(self, token: str) -> Tuple[str, str]:
         return base64.b64decode(token).decode().split(':')
 
-def on_authentication_error(request, exc):
-    raise HTTPException(
-        status_code=401,
-        detail='Authentication failiure'
-    )
-
-api.add_middleware(AuthenticationMiddleware, backend=AuthBackend(), on_error=on_authentication_error)
+api.add_middleware(AuthenticationMiddleware, backend=AuthBackend())
