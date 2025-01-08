@@ -13,6 +13,7 @@ logging.basicConfig(
 api = FastAPI(
     title='mobile-services',
     description='Web services for various club penguin apps',
+    openapi_url="/openapi.json" if config.DEBUG else None,
     redoc_url="/redoc" if config.DEBUG else None,
     docs_url="/docs" if config.DEBUG else None,
     debug=config.DEBUG
