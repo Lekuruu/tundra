@@ -9,7 +9,7 @@ from app import crypto
 
 router = APIRouter()
 
-@router.get('/authToken')
+@router.get('/authToken', response_model=AuthData)
 @requires('authenticated')
 def authtoken(request: Request):
     user: Penguin = request.user

@@ -8,7 +8,7 @@ from app.models import Account
 
 router = APIRouter()
 
-@router.get('/account')
+@router.get('/account', response_model=Account)
 @requires('authenticated')
 def account(request: Request):
     user: Penguin = request.user
