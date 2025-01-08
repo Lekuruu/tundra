@@ -23,3 +23,4 @@ USERNAME_FORCE_CASE = os.environ.get('USERNAME_FORCE_CASE', 'false').lower() == 
 APPROVE_USERNAME = os.environ.get('APPROVE_USERNAME', 'false').lower() == 'true'
 ACTIVATE_PLAYER = os.environ.get('ACTIVATE_PLAYER', 'false').lower() == 'true'
 DEBUG = os.environ.get('DEBUG', 'false').lower() == 'true'
+RELOAD = os.environ.get('RELOAD', str(DEBUG)).lower() == 'true'

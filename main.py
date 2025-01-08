@@ -10,9 +10,9 @@ def main():
         "app:api",
         host=config.WEB_HOST,
         port=config.WEB_PORT,
+        reload=config.RELOAD,
         server_header=False,
         log_config=None,
-        reload=True
     )
 
 if __name__ == "__main__":
