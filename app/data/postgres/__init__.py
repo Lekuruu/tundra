@@ -1,3 +1,3 @@
 
-from .wrapper import Postgres
+from .engine import Postgres
 from .models import *
