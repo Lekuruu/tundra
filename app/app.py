@@ -20,11 +20,3 @@ api = FastAPI(
 )
 
 api.include_router(BaseRouter)
-
-def run():
-    uvicorn.run(
-        api,
-        host=config.WEB_HOST,
-        port=config.WEB_PORT,
-        log_config=None
-    )

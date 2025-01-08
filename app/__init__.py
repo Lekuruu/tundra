@@ -5,5 +5,5 @@ from . import models
 from . import routes
 from . import exceptions
 
-from .app import api, run
+from .app import api
 from . import middleware
