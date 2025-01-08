@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from .wrapper import session_wrapper
-from ..objects import Penguin
+from ..postgres import Penguin
 
 @session_wrapper
 def create(data: dict, session: Session = ...) -> Penguin:

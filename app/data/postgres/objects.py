@@ -25,6 +25,7 @@ Base = declarative_base()
 __all__ = [
     'Base',
     'Penguin',
+    'Login',
     'Card',
     'CardStarterDeck',
     'PenguinCard',
@@ -34,7 +35,14 @@ __all__ = [
     'CoverItem',
     'PenguinStamp',
     'Item',
-    'PenguinItem'
+    'PenguinItem',
+    'BuddyList',
+    'BuddyRequest',
+    'IgnoreList',
+    'Character',
+    'CharacterBuddy',
+    'Postcard',
+    'PenguinPostcard'
 ]
 
 class Penguin(Base):

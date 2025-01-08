@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from .wrapper import session_wrapper
-from ..objects import Login
+from ..postgres import Login
 
 @session_wrapper
 def fetch_by_id(id: int, session: Session = ...) -> Login | None:

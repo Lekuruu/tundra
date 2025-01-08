@@ -4,7 +4,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 from typing import List
 
-from ..objects import Stamp, PenguinStamp
+from ..postgres import Stamp, PenguinStamp
 from .wrapper import session_wrapper
 
 @session_wrapper

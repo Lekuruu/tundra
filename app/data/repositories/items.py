@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from .wrapper import session_wrapper
-from ..objects import Item, PenguinItem
+from ..postgres import Item, PenguinItem
 
 @session_wrapper
 def create(data: dict, session: Session = ...) -> Item:

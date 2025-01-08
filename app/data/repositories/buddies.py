@@ -5,7 +5,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from ..objects import BuddyList, BuddyRequest, IgnoreList
+from ..postgres import BuddyList, BuddyRequest, IgnoreList
 from .wrapper import session_wrapper
 
 @session_wrapper

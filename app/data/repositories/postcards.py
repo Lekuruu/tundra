@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from .wrapper import session_wrapper
-from ..objects import Postcard
+from ..postgres import Postcard
 
 @session_wrapper
 def fetch_by_id(postcard_id: int, session: Session = ...) -> Postcard | None:

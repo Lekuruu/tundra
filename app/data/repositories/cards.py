@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 
-from ..objects import Card, PenguinCard
+from ..postgres import Card, PenguinCard
 from .wrapper import session_wrapper
 
 @session_wrapper
