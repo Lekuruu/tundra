@@ -4,7 +4,6 @@ from typing import Tuple
 
 from starlette.authentication import AuthenticationBackend, AuthCredentials, UnauthenticatedUser
 from starlette.middleware.authentication import AuthenticationMiddleware
-from starlette.exceptions import HTTPException
 from starlette.requests import HTTPConnection
 
 from app.data import penguins, Penguin

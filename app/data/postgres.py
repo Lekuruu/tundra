@@ -8,18 +8,29 @@ from .objects import Base
 import logging
 
 class Postgres:
-    def __init__(self, username: str, database_name: str, password: str, host: str, port: int) -> None:
+    def __init__(
+        self,
+        username: str,
+        database_name: str,
+        password: str,
+        host: str,
+        port: int
+    ) -> None:
+        self.logger = logging.getLogger('postgres')
+        self.database_name = database_name
+        self.username = username
+        self.password = password
+        self.host = host
+        self.port = port
+
         self.engine = create_engine(
-            f'postgresql://{username}:{password}@{host}:{port}/{database_name}',
+            self.database_url,
             pool_pre_ping=True,
             pool_recycle=900,
             pool_timeout=5,
             echo_pool=None,
             echo=None
         )
-
-        self.engine.dispose()
-        Base.metadata.create_all(bind=self.engine)
 
         self.sessionmaker = sessionmaker(
             bind=self.engine,
@@ -28,7 +39,12 @@ class Postgres:
             expire_on_commit=False
         )
 
-        self.logger = logging.getLogger('Postgres')
+        self.engine.dispose()
+        Base.metadata.create_all(bind=self.engine)
+
+    @property
+    def database_url(self) -> str:
+        return f'postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database_name}'
 
     @property
     def session(self) -> Session:
