@@ -2,7 +2,6 @@
 from app.routes import router as BaseRouter
 from fastapi import FastAPI
 
-import uvicorn
 import logging
 import config
 
@@ -14,9 +13,9 @@ logging.basicConfig(
 api = FastAPI(
     title='mobile-services',
     description='Web services for various club penguin apps',
-    redoc_url=None,
-    docs_url=None,
-    debug=True if config.DEBUG else False
+    redoc_url="/redoc" if config.DEBUG else None,
+    docs_url="/docs" if config.DEBUG else None,
+    debug=config.DEBUG
 )
 
 api.include_router(BaseRouter)
