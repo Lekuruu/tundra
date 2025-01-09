@@ -19,8 +19,6 @@ def run():
     if config.SSL_ENABLED:
         return run_ssl()
 
-    # NOTE: Only for debugging; use a wsgi for production
-    #       (e.g. uvicorn app:api)
     uvicorn.run(
         "app:api",
         host=config.WEB_HOST,
