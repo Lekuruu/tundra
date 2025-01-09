@@ -12,6 +12,7 @@ POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
 
 WEB_HOST = os.environ.get('WEB_HOST')
 WEB_PORT = int(os.environ.get('WEB_PORT', 80))
+WEB_DOMAIN = os.environ.get('WEB_DOMAIN', 'localhost')
 
 SSL_ENABLED = os.environ.get('SSL_ENABLED', 'false').lower() == 'true'
 SSL_KEY_PATH = os.environ.get('SSL_KEY_PATH')
