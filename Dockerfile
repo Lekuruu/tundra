@@ -1,11 +1,14 @@
 FROM python:3.13-slim
 
-# Copy the source code to /app
+# Set the working directory
 WORKDIR /app
-COPY . /app
 
 # Install required packages
+COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the source code to /app
+COPY . /app
 
 # Expose the port the app runs on
 ARG WEB_PORT
