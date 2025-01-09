@@ -3,6 +3,7 @@
 # https://github.com/solero/houdini/tree/master/houdini/data/
 
 from __future__ import annotations
+from datetime import datetime
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import text
@@ -126,6 +127,10 @@ class Penguin(Base):
     rejection_es = Column(Boolean, nullable=False, server_default=text("false"))
     rejection_de = Column(Boolean, nullable=False, server_default=text("false"))
     rejection_ru = Column(Boolean, nullable=False, server_default=text("false"))
+
+    @property
+    def penguin_age(self) -> int:
+        return (datetime.now() - self.registration_date).days
 
     @property
     def is_authenticated(self) -> bool:

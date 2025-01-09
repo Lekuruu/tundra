@@ -19,7 +19,7 @@ def account(request: Request):
         Username=user.username,
         DisplayName=user.display_name,
         Email=user.email,
-        PenguinAge=(datetime.now() - user.registration_date).days,
+        PenguinAge=user.penguin_age,
         Colour=user.color,
         Language=SystemLanguage.Unknown, # TODO
         AccountType='normal', # TODO
@@ -30,7 +30,7 @@ def account(request: Request):
         Recurring=False, # TODO
         DaysAsMember=30, # TODO
         DaysLeft=(
-            max(7 - (datetime.now() - user.registration_date).days, 0)
+            max(7 - user.penguin_age, 0)
             if not user.active else None
         )
     )
