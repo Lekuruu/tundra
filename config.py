@@ -29,3 +29,9 @@ APPROVE_USERNAME = os.environ.get('APPROVE_USERNAME', 'false').lower() == 'true'
 ACTIVATE_PLAYER = os.environ.get('ACTIVATE_PLAYER', 'false').lower() == 'true'
 DEBUG = os.environ.get('DEBUG', 'false').lower() == 'true'
 RELOAD = os.environ.get('RELOAD', str(DEBUG)).lower() == 'true'
+
+PROTOCOL = 'https' if SSL_ENABLED else 'http'
+API_BASEURL = os.environ.get('API_BASEURL', f'{PROTOCOL}://api.{WEB_DOMAIN}')
+MEDIA1_BASEURL = os.environ.get('MEDIA1_BASEURL', f'{PROTOCOL}://media.{WEB_DOMAIN}')
+MEDIA8_BASEURL = os.environ.get('MEDIA8_BASEURL', f'{PROTOCOL}://media.{WEB_DOMAIN}')
+WNS_URL = os.environ.get('WNS_URL', f'{PROTOCOL}://n7vcp1clubpwns.{WEB_DOMAIN}')

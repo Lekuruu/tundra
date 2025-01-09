@@ -1,19 +1,20 @@
 
 
 from fastapi import APIRouter, HTTPException, Query
+import config
 
 router = APIRouter()
 
 product_configurations = {
     "clubpenguin": {
-        "base_asset_url": "http://media8.clubpenguin.com/mobile/",
-        "manifest_url": "http://media8.clubpenguin.com/mobile/publishdata/r6519/manifest/manifest_tokenized.json",
-        "wns": "http://n7vcp1clubpwns.clubpenguin.com:80/",
+        "base_asset_url": f"{config.MEDIA8_BASEURL}/mobile/",
+        "manifest_url": f"{config.MEDIA8_BASEURL}/mobile/publishdata/r6519/manifest/manifest_tokenized.json",
+        "wns": config.WNS_URL,
     },
     "cjsnow": {
-        "base_asset_url": "http://media1.clubpenguin.com/game/mpassets/",
-        "manifest_url": "http://media1.clubpenguin.com/game/mpassets/publishdata/r5309/manifest/manifest_tokenized.json",
-        "wns": "http://n7vcp1clubpwns.clubpenguin.com:80/",
+        "base_asset_url": f"{config.MEDIA1_BASEURL}/game/mpassets/",
+        "manifest_url": f"{config.MEDIA1_BASEURL}/game/mpassets/publishdata/r5309/manifest/manifest_tokenized.json",
+        "wns": config.WNS_URL,
     }
 }
 
