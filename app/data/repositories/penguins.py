@@ -27,6 +27,12 @@ def fetch_by_name(name: str, session: Session = ...) -> Penguin | None:
         .first()
 
 @session_wrapper
+def fetch_by_name_case_insensitive(name: str, session: Session = ...) -> Penguin | None:
+    return session.query(Penguin) \
+        .filter(Penguin.username.ilike(name)) \
+        .first()
+
+@session_wrapper
 def fetch_by_nickname(nickname: str, session: Session = ...) -> Penguin | None:
     return session.query(Penguin) \
         .filter(Penguin.nickname == nickname) \
