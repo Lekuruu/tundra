@@ -60,6 +60,6 @@ class PlayerCardData(BaseModel):
     totalLikesGiven: int
     remainingAwardGames: int
     penguinAge: int
-    items: dict
-    outfits: list
+    items: list
+    outfits: dict
     member: bool
