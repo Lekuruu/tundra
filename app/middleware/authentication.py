@@ -117,6 +117,6 @@ class AuthBackend(AuthenticationBackend):
             return {}
 
     def parse_basic_authentication(self, token: str) -> Tuple[str, str]:
-        return base64.b64decode(token).decode().split(':')
+        return base64.b64decode(token).decode().split(':', maxsplit=1)
 
 api.add_middleware(AuthenticationMiddleware, backend=AuthBackend())
