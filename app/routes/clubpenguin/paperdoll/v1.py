@@ -15,7 +15,7 @@ def avatar_renderer_redirect(
     user = penguins.fetch_by_name_case_insensitive(username)
 
     if not user:
-        raise Response(status_code=404, content='')
+        return Response(status_code=404, content='')
 
     return RedirectResponse(
         url=f"{config.PLAY_BASEURL}/avatar/{user.id}/cp?{request.url.query}",
