@@ -26,14 +26,20 @@ class AuthData(BaseModel):
     playerId: int
     playerSwid: str
     username: str
+    email: str
     displayName: str
     authToken: str
+    friendsToken: str
     lastLogin: str
     member: bool
     pendingActivation: bool
     saveMode: bool
     accountType: str
     daysLeft: int | None = None
+    recurring: bool = False
+    overriden: bool = False
+    overrideType: str | None = None
+    consecutiveLoginCount: int = 0
 
 class Identity(BaseModel):
     playerId: int

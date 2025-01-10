@@ -21,12 +21,17 @@ def authtoken(request: Request):
     if (login := logins.fetch_recent(user.id)):
         recent_login = login.date
 
+    # Generate new token
+    token = crypto.generate_token(user)
+
     return AuthData(
         playerId=user.id,
         playerSwid=user.nickname,
         username=user.username,
+        email=user.email,
         displayName=user.display_name,
-        authToken=crypto.generate_token(user),
+        authToken=token,
+        friendsToken=token,
         lastLogin=recent_login.strftime('%Y-%m-%d %H:%M:%S'),
         saveMode=user.safe_chat,
         member=user.is_member,
