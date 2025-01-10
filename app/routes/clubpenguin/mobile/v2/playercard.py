@@ -20,7 +20,7 @@ def player_card(request: Request) -> PlayerCardData:
         totalLikesGiven=0, # TODO
         remainingAwardGames=0, # TODO
         penguinAge=user.penguin_age,
-        items={}, # TODO
-        outfits=[], # TODO
+        items=[], # TODO
+        outfits={}, # TODO
         member=user.is_member
     )
