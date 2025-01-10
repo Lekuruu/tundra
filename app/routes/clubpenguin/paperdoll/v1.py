@@ -7,16 +7,11 @@ import config
 
 router = APIRouter()
 
-@router.get("/v1/{username}/cp")
+@router.get("/v1/{user_id}/cp")
 def avatar_renderer_redirect(
-    username: str,
+    user_id: int,
     request: Request
 ) -> RedirectResponse:
-    user = penguins.fetch_by_name_case_insensitive(username)
-
-    if not user:
-        return Response(status_code=404, content='')
-
     return RedirectResponse(
-        url=f"{config.PLAY_BASEURL}/avatar/{user.id}/cp?{request.url.query}",
+        url=f"{config.PLAY_BASEURL}/avatar/{user_id}/cp?{request.url.query}",
     )
