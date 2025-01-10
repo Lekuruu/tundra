@@ -153,10 +153,10 @@ class Penguin(Base):
     @property
     def display_name(self) -> str:
         return self.nickname
-
+    
     @property
-    def identity(self) -> int:
-        return self.id
+    def swid(self) -> str:
+        return str(self.id)
 
 class Login(Base):
     __tablename__ = 'login'
