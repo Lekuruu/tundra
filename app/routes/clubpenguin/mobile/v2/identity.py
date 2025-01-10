@@ -27,21 +27,21 @@ def identity(
     language: SystemLanguage = Query(...)
 ) -> Identity:
     user = penguins.fetch_by_id(id)
-    display_name = f'P{user.id}'
+    username = f'P{user.id}'
 
     if not user:
         raise HTTPException(404, 'Penguin not found')
 
     if is_username_approved(user, language):
-        user.display_name = user.display_name
+        username = user.display_name
 
     return Identity(
         playerId=user.id,
-        playerSwid=user.nickname,
-        displayName=display_name,
+        playerSwid=user.swid,
+        displayName=user.username,
+        username=username,
         accountType=user.account_type,
         daysLeft=None,
         badgeLevel=user.badge_level,
-        member=user.is_member,
-        username=user.username
+        member=user.is_member
     )
