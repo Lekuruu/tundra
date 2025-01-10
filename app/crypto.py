@@ -15,26 +15,28 @@ def generate_random_key():
 def generate_token(user: Penguin) -> str:
     return jwt.encode(
         {
-            'sub': user.id,
+            'id': user.id,
             'name': user.username,
-            'iat': round(time.time()),
+            'exp': round(time.time()) + config.WEB_TOKEN_EXPIRATION,
         },
         config.STATIC_KEY,
         algorithm='HS256'
     )
 
 def decode_token(token: str) -> dict:
-    data = jwt.decode(
-        token,
-        config.STATIC_KEY,
-        algorithms=['HS256']
-    )
+    try:
+        data = jwt.decode(
+            token,
+            config.STATIC_KEY,
+            algorithms=['HS256']
+        )
+    except jwt.PyJWTError:
+        return
 
-    for field in ('sub', 'name', 'iat'):
-        if field not in data:
-            return
+    # Check if the token is expired
+    if data['exp'] < round(time.time()):
+        return
 
-    # TODO: Token expiration
     return data
 
 def get_hash(undigested: Union[str, int, bytes]) -> str:

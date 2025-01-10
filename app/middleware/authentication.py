@@ -96,7 +96,7 @@ class AuthBackend(AuthenticationBackend):
         loop = asyncio.get_event_loop()
 
         penguin = await loop.run_in_executor(
-            None, penguins.fetch_by_id, data['sub']
+            None, penguins.fetch_by_id, data['id']
         )
 
         if not penguin:
