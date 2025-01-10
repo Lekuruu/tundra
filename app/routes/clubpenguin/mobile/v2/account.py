@@ -15,9 +15,9 @@ def account(request: Request):
 
     return Account(
         playerId=user.id,
-        playerSwid=user.nickname,
-        username=user.username,
-        displayName=user.display_name,
+        playerSwid=user.swid,
+        username=user.nickname,
+        displayName=user.username,
         email=user.email,
         penguinAge=user.penguin_age,
         colour=user.color,

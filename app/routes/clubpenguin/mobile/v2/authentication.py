@@ -26,10 +26,10 @@ def authtoken(request: Request):
 
     return AuthData(
         playerId=user.id,
-        playerSwid=user.nickname,
-        username=user.username,
+        playerSwid=user.swid,
+        username=user.nickname,
+        displayName=user.username,
         email=user.email,
-        displayName=user.display_name,
         authToken=token,
         friendsToken=token,
         lastLogin=recent_login.strftime('%Y-%m-%d %H:%M:%S'),
