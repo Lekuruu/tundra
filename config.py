@@ -33,6 +33,7 @@ RELOAD = os.environ.get('RELOAD', str(DEBUG)).lower() == 'true'
 
 PROTOCOL = 'https' if SSL_ENABLED else 'http'
 HOME_BASEURL = os.environ.get('HOME_BASEURL', f'{PROTOCOL}://{WEB_DOMAIN}')
+PLAY_BASEURL = os.environ.get('PLAY_BASEURL', f'{PROTOCOL}://play.{WEB_DOMAIN}')
 API_BASEURL = os.environ.get('API_BASEURL', f'{PROTOCOL}://api.{WEB_DOMAIN}')
 MEDIA1_BASEURL = os.environ.get('MEDIA1_BASEURL', f'{PROTOCOL}://media.{WEB_DOMAIN}')
 MEDIA8_BASEURL = os.environ.get('MEDIA8_BASEURL', f'{PROTOCOL}://media.{WEB_DOMAIN}')
