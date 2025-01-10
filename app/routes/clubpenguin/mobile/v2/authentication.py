@@ -29,8 +29,8 @@ def authtoken(request: Request):
         authToken=crypto.generate_token(user),
         lastLogin=recent_login.strftime('%Y-%m-%d %H:%M:%S'),
         saveMode=user.safe_chat,
-        member=True, # TODO
-        accountType='normal', # TODO
+        member=user.is_member,
+        accountType=user.account_type,
         pendingActivation=(not user.active),
         daysLeft=(
             max(7 - (datetime.now() - user.registration_date).days, 0)

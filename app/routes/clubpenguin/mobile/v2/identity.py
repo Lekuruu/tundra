@@ -39,9 +39,9 @@ def identity(
         playerId=user.id,
         playerSwid=user.nickname,
         displayName=display_name,
-        accountType='normal', # TODO
-        daysLeft=30, # TODO
-        badgeLevel=1, # TODO
-        member=True, # TODO
+        accountType=user.account_type,
+        daysLeft=None,
+        badgeLevel=user.badge_level,
+        member=user.is_member,
         username=user.username
     )

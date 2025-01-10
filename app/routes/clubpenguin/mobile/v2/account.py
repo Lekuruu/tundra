@@ -22,12 +22,12 @@ def account(request: Request):
         penguinAge=user.penguin_age,
         colour=user.color,
         language=SystemLanguage.Unknown, # TODO
-        accountType='normal', # TODO
-        member=True, # TODO
+        accountType=user.account_type,
+        member=user.is_member,
         lapsedMember=False, # TODO
         pendingActivation=(not user.active),
         safeMode=user.safe_chat,
-        recurring=False, # TODO
+        recurring=True, # TODO
         daysAsMember=30, # TODO
         daysLeft=(
             max(7 - user.penguin_age, 0)

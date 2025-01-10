@@ -21,6 +21,8 @@ from sqlalchemy import (
     CHAR
 )
 
+import math
+
 Base = declarative_base()
 
 __all__ = [
@@ -131,6 +133,18 @@ class Penguin(Base):
     @property
     def penguin_age(self) -> int:
         return (datetime.now() - self.registration_date).days
+    
+    @property
+    def badge_level(self) -> int:
+        return min(5, math.ceil(self.penguin_age / 180))
+    
+    @property
+    def account_type(self) -> str:
+        return 'standard' if not self.is_member else 'member'
+
+    @property
+    def is_member(self) -> bool:
+        return True # TODO
 
     @property
     def is_authenticated(self) -> bool:

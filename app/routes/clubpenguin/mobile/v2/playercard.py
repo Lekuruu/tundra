@@ -15,12 +15,12 @@ def player_card(request: Request) -> PlayerCardData:
         name=user.display_name,
         coins=user.coins,
         daysAsMember=30, # TODO
-        badgeLevel=1, # TODO
+        badgeLevel=user.badge_level,
         totalLikesReceived=0, # TODO
         totalLikesGiven=0, # TODO
         remainingAwardGames=0, # TODO
-        penguinAge=user.penguin_age, # TODO
+        penguinAge=user.penguin_age,
         items={}, # TODO
         outfits=[], # TODO
-        member=True # TODO
+        member=user.is_member
     )
