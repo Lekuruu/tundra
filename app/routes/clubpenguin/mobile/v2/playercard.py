@@ -21,6 +21,6 @@ def player_card(request: Request) -> PlayerCardData:
         remainingAwardGames=0, # TODO
         penguinAge=user.penguin_age, # TODO
         items={}, # TODO
-        outfits={}, # TODO
+        outfits=[], # TODO
         member=True # TODO
     )

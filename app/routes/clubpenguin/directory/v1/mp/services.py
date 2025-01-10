@@ -32,8 +32,8 @@ def services(
     return {
         "base_asset_url": config["base_asset_url"],
         "manifest_url": config["manifest_url"],
+        "wns": config["wns"],
+        "wns_product": product,
         "version": "1.6.23",
         "version_requested": version,
-        "wns": config["wns"],
-        "wns_product": product
     }
