@@ -7,8 +7,11 @@ WORKDIR /app
 COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the source code to /app
-COPY . /app
+# This dockerfile requires you to have a volume that contains the source code for tundra
+# You can add this line, if you don't want to use a volume:
+# COPY . .
+
+VOLUME /app
 
 # Expose the port the app runs on
 ARG WEB_PORT
