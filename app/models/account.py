@@ -1,6 +1,8 @@
 
 from __future__ import annotations
 from pydantic import BaseModel
+from typing import List
+from .outfit import Outfit
 
 class Account(BaseModel):
     playerId: int
@@ -60,6 +62,6 @@ class PlayerCardData(BaseModel):
     totalLikesGiven: int
     remainingAwardGames: int
     penguinAge: int
-    items: list
-    outfits: dict
+    items: List[int]
+    outfits: List[Outfit]
     member: bool
