@@ -14,22 +14,22 @@ def account(request: Request):
     user: Penguin = request.user
 
     return Account(
-        PlayerId=user.id,
-        PlayerSwid=user.nickname,
-        Username=user.username,
-        DisplayName=user.display_name,
-        Email=user.email,
-        PenguinAge=user.penguin_age,
-        Colour=user.color,
-        Language=SystemLanguage.Unknown, # TODO
-        AccountType='normal', # TODO
-        Member=True, # TODO
-        LapsedMember=False, # TODO
-        PendingActivation=(not user.active),
-        SafeMode=user.safe_chat,
-        Recurring=False, # TODO
-        DaysAsMember=30, # TODO
-        DaysLeft=(
+        playerId=user.id,
+        playerSwid=user.nickname,
+        username=user.username,
+        displayName=user.display_name,
+        email=user.email,
+        penguinAge=user.penguin_age,
+        colour=user.color,
+        language=SystemLanguage.Unknown, # TODO
+        accountType='normal', # TODO
+        member=True, # TODO
+        lapsedMember=False, # TODO
+        pendingActivation=(not user.active),
+        safeMode=user.safe_chat,
+        recurring=False, # TODO
+        daysAsMember=30, # TODO
+        daysLeft=(
             max(7 - user.penguin_age, 0)
             if not user.active else None
         )

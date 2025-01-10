@@ -11,7 +11,7 @@ from .app import api
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         ResponseError(
-            ErrorResponse=ErrorResponseObject(
+            errorResponse=ErrorResponseObject(
                 errorCode=400,
                 message='Invalid request'
             )
@@ -23,7 +23,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         ResponseError(
-            ErrorResponse=ErrorResponseObject(
+            errorResponse=ErrorResponseObject(
                 errorCode=exc.status_code,
                 message=exc.detail
             )
@@ -35,7 +35,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 async def starlette_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         ResponseError(
-            ErrorResponse=ErrorResponseObject(
+            errorResponse=ErrorResponseObject(
                 errorCode=exc.status_code,
                 message=exc.detail
             )

@@ -6,5 +6,5 @@ class ErrorResponseObject(BaseModel):
     message: str
 
 class ResponseError(BaseModel):
-    ErrorResponse: ErrorResponseObject
-    UserSuggestion: str = ""
+    errorResponse: ErrorResponseObject
+    userSuggestion: str = ""

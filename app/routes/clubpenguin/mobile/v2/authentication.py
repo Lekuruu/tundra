@@ -22,17 +22,17 @@ def authtoken(request: Request):
         recent_login = login.date
 
     return AuthData(
-        PlayerId=user.id,
-        PlayerSwid=user.nickname,
-        Username=user.username,
-        DisplayName=user.display_name,
-        AuthToken=crypto.generate_token(user),
-        LastLogin=recent_login.strftime('%Y-%m-%d %H:%M:%S'),
-        SaveMode=user.safe_chat,
-        Member=True, # TODO
-        AccountType='normal', # TODO
-        PendingActivation=(not user.active),
-        DaysLeft=(
+        playerId=user.id,
+        playerSwid=user.nickname,
+        username=user.username,
+        displayName=user.display_name,
+        authToken=crypto.generate_token(user),
+        lastLogin=recent_login.strftime('%Y-%m-%d %H:%M:%S'),
+        saveMode=user.safe_chat,
+        member=True, # TODO
+        accountType='normal', # TODO
+        pendingActivation=(not user.active),
+        daysLeft=(
             max(7 - (datetime.now() - user.registration_date).days, 0)
             if not user.active else None
         )

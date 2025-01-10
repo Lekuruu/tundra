@@ -36,12 +36,12 @@ def identity(
         user.display_name = user.display_name
 
     return Identity(
-        PlayerId=user.id,
-        PlayerSwid=user.nickname,
-        DisplayName=display_name,
-        AccountType='normal', # TODO
-        DaysLeft=30, # TODO
-        BadgeLevel=1, # TODO
-        Member=True, # TODO
-        Username=user.username
+        playerId=user.id,
+        playerSwid=user.nickname,
+        displayName=display_name,
+        accountType='normal', # TODO
+        daysLeft=30, # TODO
+        badgeLevel=1, # TODO
+        member=True, # TODO
+        username=user.username
     )
