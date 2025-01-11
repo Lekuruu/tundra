@@ -28,14 +28,6 @@ def fetch_by_penguin_id(penguin_id: int, session: Session = ...) -> List[Item]:
         .all()
 
 @session_wrapper
-def fetch_ids_by_penguin_id(penguin_id: int, session: Session = ...) -> List[int]:
-    result = session.query(PenguinItem.item_id) \
-        .filter(PenguinItem.penguin_id == penguin_id) \
-        .all()
-    
-    return [item_id for item_id, in result]
-
-@session_wrapper
 def fetch_item_by_penguin_id(
     penguin_id: int,
     item_id: int,

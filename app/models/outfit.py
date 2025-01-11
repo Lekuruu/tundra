@@ -12,3 +12,9 @@ class Outfit(BaseModel):
     feet: int
     flag: int
     photo: int
+
+    def serialize(self) -> str:
+        return "|".join(
+            str(getattr(self, part))
+            for part in self.model_fields.keys()
+        )
