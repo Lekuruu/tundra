@@ -1,27 +1,25 @@
 
-from __future__ import annotations
-
 from sqlalchemy.orm import Session
 from typing import List
 
-from .wrapper import session_wrapper
+from .wrapper import SessionProvider, session_wrapper
 from ..postgres import Item, PenguinItem
 
 @session_wrapper
-def create(data: dict, session: Session = ...) -> Item:
+def create(data: dict, session: Session = SessionProvider) -> Item:
     item = Item(**data)
     session.add(item)
     session.commit()
     return item
 
 @session_wrapper
-def fetch_one(id: int, session: Session = ...) -> Item | None:
+def fetch_one(id: int, session: Session = SessionProvider) -> Item | None:
     return session.query(Item) \
         .filter(Item.id == id) \
         .first()
 
 @session_wrapper
-def fetch_by_penguin_id(penguin_id: int, session: Session = ...) -> List[Item]:
+def fetch_by_penguin_id(penguin_id: int, session: Session = SessionProvider) -> List[Item]:
     return session.query(Item) \
         .join(PenguinItem, Item.id == PenguinItem.item_id) \
         .filter(PenguinItem.penguin_id == penguin_id) \
@@ -31,7 +29,7 @@ def fetch_by_penguin_id(penguin_id: int, session: Session = ...) -> List[Item]:
 def fetch_item_by_penguin_id(
     penguin_id: int,
     item_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> Item | None:
     return session.query(Item) \
         .join(PenguinItem, Item.id == PenguinItem.item_id) \
@@ -43,7 +41,7 @@ def fetch_item_by_penguin_id(
 def add(
     penguin_id: int,
     item_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> None:
     if item_exists(penguin_id, item_id, session=session):
         return
@@ -55,7 +53,7 @@ def add(
 def remove(
     penguin_id: int,
     item_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> None:
     session.query(PenguinItem) \
         .filter(PenguinItem.penguin_id == penguin_id) \
@@ -67,7 +65,7 @@ def remove(
 def item_exists(
     penguin_id: int,
     item_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> bool:
     return session.query(PenguinItem) \
         .filter(PenguinItem.penguin_id == penguin_id) \

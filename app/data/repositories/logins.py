@@ -1,20 +1,18 @@
 
-from __future__ import annotations
-
 from sqlalchemy.orm import Session
 from typing import List
 
-from .wrapper import session_wrapper
+from .wrapper import SessionProvider, session_wrapper
 from ..postgres import Login
 
 @session_wrapper
-def fetch_by_id(id: int, session: Session = ...) -> Login | None:
+def fetch_by_id(id: int, session: Session = SessionProvider) -> Login | None:
     return session.query(Login) \
         .filter(Login.id == id) \
         .first()
 
 @session_wrapper
-def fetch_all(penguin_id: int, session: Session = ...) -> List[Login]:
+def fetch_all(penguin_id: int, session: Session = SessionProvider) -> List[Login]:
     return session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \
         .all()
@@ -24,7 +22,7 @@ def fetch_many(
     penguin_id: int,
     limit: int,
     offset: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> List[Login]:
     return session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \
@@ -34,13 +32,13 @@ def fetch_many(
         .all()
 
 @session_wrapper
-def fetch_by_ip(ip_hash: str, session: Session = ...) -> List[Login]:
+def fetch_by_ip(ip_hash: str, session: Session = SessionProvider) -> List[Login]:
     return session.query(Login) \
         .filter(Login.ip_hash == ip_hash) \
         .all()
 
 @session_wrapper
-def fetch_recent(penguin_id: int, session: Session = ...) -> Login | None:
+def fetch_recent(penguin_id: int, session: Session = SessionProvider) -> Login | None:
     return session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \
         .order_by(Login.id.desc()) \
@@ -50,7 +48,7 @@ def fetch_recent(penguin_id: int, session: Session = ...) -> Login | None:
 def add(
     penguin_id: int,
     ip_hash: str,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> Login:
     login = Login(penguin_id=penguin_id, ip_hash=ip_hash)
     session.add(login)
@@ -61,7 +59,7 @@ def add(
 def update(
     id: int,
     updates: dict,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> None:
     session.query(Login) \
         .filter(Login.id == id) \
@@ -72,7 +70,7 @@ def update(
 def update_recent(
     penguin_id: int,
     updates: dict,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> None:
     session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \

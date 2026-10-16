@@ -1,7 +1,15 @@
 
 from sqlalchemy.orm import Session
 from functools import wraps
+from typing import Any
 import app.session
+
+"""
+Used with `session: Session = SessionProvider` in repository functions.
+When @session_wrapper is used, this will guarantee that a session is always provided,
+either by the caller or by the wrapper itself.
+"""
+SessionProvider: Any | Session = ...
 
 def session_wrapper(func):
     """Function wrapper for database session management.
@@ -9,7 +17,7 @@ def session_wrapper(func):
     Example usage:
     ```
     @session_wrapper
-    def fetch_one(id: int, session: Session = ...) -> YourModel:
+    def fetch_one(id: int, session: Session = SessionProvider) -> YourModel:
         return session.query(YourModel).all()
 
     fetch_one(1)                   # Will use a new session

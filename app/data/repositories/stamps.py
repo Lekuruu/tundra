@@ -1,20 +1,18 @@
 
-from __future__ import annotations
-
 from sqlalchemy.orm import Session
 from typing import List
 
 from ..postgres import Stamp, PenguinStamp
-from .wrapper import session_wrapper
+from .wrapper import SessionProvider, session_wrapper
 
 @session_wrapper
-def fetch_one(id: int, session: Session = ...) -> Stamp | None:
+def fetch_one(id: int, session: Session = SessionProvider) -> Stamp | None:
     return session.query(Stamp) \
         .filter(Stamp.id == id) \
         .first()
 
 @session_wrapper
-def fetch_all_by_group(group_id: int, session: Session = ...) -> List[Stamp]:
+def fetch_all_by_group(group_id: int, session: Session = SessionProvider) -> List[Stamp]:
     return session.query(Stamp) \
         .filter(Stamp.group_id == group_id) \
         .all()
@@ -23,7 +21,7 @@ def fetch_all_by_group(group_id: int, session: Session = ...) -> List[Stamp]:
 def fetch_by_penguin_id(
     penguin_id: int,
     group_id: int | None = None,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> List[Stamp]:
     query = session.query(Stamp) \
         .join(PenguinStamp, Stamp.id == PenguinStamp.stamp_id) \
@@ -38,8 +36,8 @@ def fetch_by_penguin_id(
 def add(
     id: int,
     penguin_id: int,
-    session: Session = ...
-) -> Stamp:
+    session: Session = SessionProvider
+) -> PenguinStamp:
     penguin_stamp = PenguinStamp(penguin_id=penguin_id, stamp_id=id)
     session.add(penguin_stamp)
     session.commit()
@@ -49,7 +47,7 @@ def add(
 def remove(
     id: int,
     penguin_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> int:
     rows = session.query(PenguinStamp) \
         .filter_by(penguin_id=penguin_id, stamp_id=id) \
@@ -61,7 +59,7 @@ def remove(
 def exists(
     id: int,
     penguin_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> bool:
     return session.query(PenguinStamp) \
         .filter_by(penguin_id=penguin_id, stamp_id=id) \
@@ -71,7 +69,7 @@ def exists(
 def completed_group(
     penguin_id: int,
     group_id: int,
-    session: Session = ...
+    session: Session = SessionProvider
 ) -> bool:
     total = session.query(Stamp) \
         .filter(Stamp.group_id == group_id) \
