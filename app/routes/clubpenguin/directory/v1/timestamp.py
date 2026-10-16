@@ -1,9 +1,9 @@
 
 from fastapi import APIRouter
-from datetime import datetime
+from time import time_ns
 
 router = APIRouter()
 
 @router.get('/timestamp')
 def timestamp() -> dict:
-    return {"timestamp": datetime.now().timestamp()}
+    return {"timestamp": time_ns() // 1_000_000}

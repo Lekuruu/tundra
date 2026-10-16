@@ -1,10 +1,8 @@
 
-from __future__ import annotations
-from typing import Tuple
-
 from starlette.authentication import AuthenticationBackend, AuthCredentials, UnauthenticatedUser
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
+from typing import Tuple
 
 from app.data import penguins, Penguin
 from app.data import CELLOPHANE_TOKENS

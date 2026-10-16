@@ -1,5 +1,4 @@
 
-from __future__ import annotations
 from fastapi import APIRouter, Query
 import config
 
@@ -24,7 +23,7 @@ def services(product: str | None = Query(None)) -> dict:
         "avatar-renderer-service-cellophane": f"{config.API_BASEURL}/clubpenguin/paperdoll-renderer/v1",
         "player-data-service": f"{config.API_BASEURL}/clubpenguin/mobile/v2",
         "games-service": f"{config.API_BASEURL}/clubpenguin/mobile/v2",
-        "apple-product-id-service": f"{config.API_BASEURL}/clubpenguin/mobile/v2",
+        "store-product-id-service": f"{config.API_BASEURL}/clubpenguin/mobile/v2",
         "catalog-items-images": f"{config.MEDIA8_BASEURL}/game/items/images/",
         "avatar-image-service_items": f"{config.MEDIA8_BASEURL}/game/items/images/paper/image",
         "login-service": f"{config.API_BASEURL}/clubpenguin/mobile/v2",

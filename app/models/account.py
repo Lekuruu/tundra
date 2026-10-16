@@ -1,13 +1,14 @@
 
-from __future__ import annotations
 from pydantic import BaseModel
-from typing import List
+
 from .items import Items
+
 
 class Account(BaseModel):
     playerId: int
     playerSwid: str
     username: str
+    displayName: str
     email: str
     penguinAge: int
     colour: int
@@ -19,10 +20,14 @@ class Account(BaseModel):
     safeMode: bool
     recurring: bool
     overrideType: str = ""
-    daysLeft: int | None = None
-    daysAsMember: int | None = None
-    badgeLevel: int | None = None
-    overriden: bool | None = None
+    daysLeft: int = -1
+    daysAsMember: int = -1
+    badgeLevel: int = -1
+    overriden: bool = False
+    expirationTimestamp: float | None = None
+    preactivPlayTime: float | None = None
+    preactivGracePeriod: float | None = None
+
 
 class AuthData(BaseModel):
     playerId: int
@@ -35,13 +40,14 @@ class AuthData(BaseModel):
     lastLogin: str
     member: bool
     pendingActivation: bool
-    saveMode: bool
+    safeMode: bool
     accountType: str
-    daysLeft: int | None = None
+    daysLeft: int = -1
     recurring: bool = False
     overriden: bool = False
-    overrideType: str | None = None
+    overrideType: str = ""
     consecutiveLoginCount: int = 0
+
 
 class Identity(BaseModel):
     playerId: int
@@ -53,6 +59,15 @@ class Identity(BaseModel):
     member: bool
     username: str
 
+
+class MPTokenResponse(BaseModel):
+    mpSessionToken: str
+
+
+class PlayerCardOutfit(BaseModel):
+    itemList: str
+
+
 class PlayerCardData(BaseModel):
     name: str
     coins: int
@@ -63,5 +78,5 @@ class PlayerCardData(BaseModel):
     remainingAwardGames: int
     penguinAge: int
     items: Items
-    outfit: List[str]
+    outfits: list[PlayerCardOutfit]
     member: bool

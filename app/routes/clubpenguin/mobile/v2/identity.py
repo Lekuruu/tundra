@@ -1,7 +1,9 @@
 
-from fastapi import HTTPException, APIRouter, Request, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from starlette.authentication import requires
-from app.data import SystemLanguage, Penguin
+from typing import Annotated
+
+from app.data import Penguin, SystemLanguage
 from app.data.repositories import penguins
 from app.models import Identity
 
@@ -24,13 +26,14 @@ def is_username_approved(penguin: Penguin, language: SystemLanguage) -> bool:
 def identity(
     request: Request,
     id: int,
-    language: SystemLanguage = Query(...)
+    language: Annotated[SystemLanguage, Query()]
 ) -> Identity:
     user = penguins.fetch_by_id(id)
-    username = f'P{user.id}'
 
     if not user:
         raise HTTPException(404, 'Penguin not found')
+
+    username = f'P{user.id}'
 
     if is_username_approved(user, language):
         username = user.display_name
@@ -41,7 +44,10 @@ def identity(
         displayName=user.username,
         username=username,
         accountType=user.account_type,
-        daysLeft=None,
+        daysLeft=(
+            max(7 - user.penguin_age, 0)
+            if not user.active else -1
+        ),
         badgeLevel=user.badge_level,
         member=user.is_member
     )
