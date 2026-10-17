@@ -1,29 +1,23 @@
 
 from sqlalchemy.orm import Session
-from typing import List
-
-from .wrapper import SessionProvider, session_wrapper
 from ..postgres import Login
 
-@session_wrapper
-def fetch_by_id(id: int, session: Session = SessionProvider) -> Login | None:
+def fetch_by_id(session: Session, id: int) -> Login | None:
     return session.query(Login) \
         .filter(Login.id == id) \
         .first()
 
-@session_wrapper
-def fetch_all(penguin_id: int, session: Session = SessionProvider) -> List[Login]:
+def fetch_all(session: Session, penguin_id: int) -> list[Login]:
     return session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \
         .all()
 
-@session_wrapper
 def fetch_many(
+    session: Session,
     penguin_id: int,
     limit: int,
     offset: int,
-    session: Session = SessionProvider
-) -> List[Login]:
+) -> list[Login]:
     return session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \
         .order_by(Login.id.desc()) \
@@ -31,46 +25,41 @@ def fetch_many(
         .offset(offset) \
         .all()
 
-@session_wrapper
-def fetch_by_ip(ip_hash: str, session: Session = SessionProvider) -> List[Login]:
+def fetch_by_ip(session: Session, ip_hash: str) -> list[Login]:
     return session.query(Login) \
         .filter(Login.ip_hash == ip_hash) \
         .all()
 
-@session_wrapper
-def fetch_recent(penguin_id: int, session: Session = SessionProvider) -> Login | None:
+def fetch_recent(session: Session, penguin_id: int) -> Login | None:
     return session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \
         .order_by(Login.id.desc()) \
         .first()
 
-@session_wrapper
 def add(
+    session: Session,
     penguin_id: int,
     ip_hash: str,
-    session: Session = SessionProvider
 ) -> Login:
     login = Login(penguin_id=penguin_id, ip_hash=ip_hash)
     session.add(login)
     session.commit()
     return login
 
-@session_wrapper
 def update(
+    session: Session,
     id: int,
     updates: dict,
-    session: Session = SessionProvider
 ) -> None:
     session.query(Login) \
         .filter(Login.id == id) \
         .update(updates)
     session.commit()
 
-@session_wrapper
 def update_recent(
+    session: Session,
     penguin_id: int,
     updates: dict,
-    session: Session = SessionProvider
 ) -> None:
     session.query(Login) \
         .filter(Login.penguin_id == penguin_id) \

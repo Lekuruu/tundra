@@ -1,35 +1,28 @@
 
 from sqlalchemy.orm import Session
-from typing import List
-
-from .wrapper import SessionProvider, session_wrapper
 from ..postgres import Item, PenguinItem
 
-@session_wrapper
-def create(data: dict, session: Session = SessionProvider) -> Item:
+def create(session: Session, data: dict) -> Item:
     item = Item(**data)
     session.add(item)
     session.commit()
     return item
 
-@session_wrapper
-def fetch_one(id: int, session: Session = SessionProvider) -> Item | None:
+def fetch_one(session: Session, id: int) -> Item | None:
     return session.query(Item) \
         .filter(Item.id == id) \
         .first()
 
-@session_wrapper
-def fetch_by_penguin_id(penguin_id: int, session: Session = SessionProvider) -> List[Item]:
+def fetch_by_penguin_id(session: Session, penguin_id: int) -> list[Item]:
     return session.query(Item) \
         .join(PenguinItem, Item.id == PenguinItem.item_id) \
         .filter(PenguinItem.penguin_id == penguin_id) \
         .all()
 
-@session_wrapper
 def fetch_item_by_penguin_id(
+    session: Session,
     penguin_id: int,
     item_id: int,
-    session: Session = SessionProvider
 ) -> Item | None:
     return session.query(Item) \
         .join(PenguinItem, Item.id == PenguinItem.item_id) \
@@ -37,23 +30,21 @@ def fetch_item_by_penguin_id(
         .filter(PenguinItem.item_id == item_id) \
         .first()
 
-@session_wrapper
 def add(
+    session: Session,
     penguin_id: int,
     item_id: int,
-    session: Session = SessionProvider
 ) -> None:
-    if item_exists(penguin_id, item_id, session=session):
+    if item_exists(session, penguin_id, item_id):
         return
 
     session.add(PenguinItem(penguin_id=penguin_id, item_id=item_id))
     session.commit()
 
-@session_wrapper
 def remove(
+    session: Session,
     penguin_id: int,
     item_id: int,
-    session: Session = SessionProvider
 ) -> None:
     session.query(PenguinItem) \
         .filter(PenguinItem.penguin_id == penguin_id) \
@@ -61,11 +52,10 @@ def remove(
         .delete()
     session.commit()
 
-@session_wrapper
 def item_exists(
+    session: Session,
     penguin_id: int,
     item_id: int,
-    session: Session = SessionProvider
 ) -> bool:
     return session.query(PenguinItem) \
         .filter(PenguinItem.penguin_id == penguin_id) \

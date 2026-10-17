@@ -1,10 +1,12 @@
 
-from sqlalchemy.orm import sessionmaker, Session
+from starlette.exceptions import HTTPException
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
 from contextlib import contextmanager
+import logging
+
 from .models import Base
 
-import logging
 
 class Postgres:
     def __init__(
@@ -38,7 +40,6 @@ class Postgres:
             expire_on_commit=False
         )
 
-        self.engine.dispose()
         Base.metadata.create_all(bind=self.engine)
 
     @property
@@ -55,9 +56,13 @@ class Postgres:
         try:
             yield session
         except Exception as e:
+            if isinstance(e, HTTPException): raise
             self.logger.fatal(f'Transaction failed: {e}', exc_info=e)
             self.logger.fatal('Performing rollback...')
             session.rollback()
             raise
         finally:
             session.close()
+
+    def close(self) -> None:
+        self.engine.dispose()

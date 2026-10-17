@@ -1,28 +1,22 @@
 
 from sqlalchemy.orm import Session
-from typing import List
+from ..postgres import PenguinStamp, Stamp
 
-from ..postgres import Stamp, PenguinStamp
-from .wrapper import SessionProvider, session_wrapper
-
-@session_wrapper
-def fetch_one(id: int, session: Session = SessionProvider) -> Stamp | None:
+def fetch_one(session: Session, id: int) -> Stamp | None:
     return session.query(Stamp) \
         .filter(Stamp.id == id) \
         .first()
 
-@session_wrapper
-def fetch_all_by_group(group_id: int, session: Session = SessionProvider) -> List[Stamp]:
+def fetch_all_by_group(session: Session, group_id: int) -> list[Stamp]:
     return session.query(Stamp) \
         .filter(Stamp.group_id == group_id) \
         .all()
 
-@session_wrapper
 def fetch_by_penguin_id(
+    session: Session,
     penguin_id: int,
     group_id: int | None = None,
-    session: Session = SessionProvider
-) -> List[Stamp]:
+) -> list[Stamp]:
     query = session.query(Stamp) \
         .join(PenguinStamp, Stamp.id == PenguinStamp.stamp_id) \
         .filter(PenguinStamp.penguin_id == penguin_id)
@@ -32,22 +26,20 @@ def fetch_by_penguin_id(
 
     return query.all()
 
-@session_wrapper
 def add(
+    session: Session,
     id: int,
     penguin_id: int,
-    session: Session = SessionProvider
 ) -> PenguinStamp:
     penguin_stamp = PenguinStamp(penguin_id=penguin_id, stamp_id=id)
     session.add(penguin_stamp)
     session.commit()
     return penguin_stamp
 
-@session_wrapper
 def remove(
+    session: Session,
     id: int,
     penguin_id: int,
-    session: Session = SessionProvider
 ) -> int:
     rows = session.query(PenguinStamp) \
         .filter_by(penguin_id=penguin_id, stamp_id=id) \
@@ -55,21 +47,19 @@ def remove(
     session.commit()
     return rows
 
-@session_wrapper
 def exists(
+    session: Session,
     id: int,
     penguin_id: int,
-    session: Session = SessionProvider
 ) -> bool:
     return session.query(PenguinStamp) \
         .filter_by(penguin_id=penguin_id, stamp_id=id) \
         .count() > 0
 
-@session_wrapper
 def completed_group(
+    session: Session,
     penguin_id: int,
     group_id: int,
-    session: Session = SessionProvider
 ) -> bool:
     total = session.query(Stamp) \
         .filter(Stamp.group_id == group_id) \

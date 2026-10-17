@@ -1,33 +1,24 @@
 
-from typing import List
-
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-
 from ..postgres import PenguinPostcard
-from .wrapper import SessionProvider, session_wrapper
 
-@session_wrapper
-def create(data: dict, session: Session = SessionProvider) -> PenguinPostcard:
+def create(session: Session, data: dict) -> PenguinPostcard:
     postcard = PenguinPostcard(**data)
     session.add(postcard)
     session.commit()
     return postcard
 
-@session_wrapper
-def fetch_by_id(mail_id: int, session: Session = SessionProvider) -> PenguinPostcard | None:
+def fetch_by_id(session: Session, mail_id: int) -> PenguinPostcard | None:
     return session.query(PenguinPostcard) \
         .filter(PenguinPostcard.id == mail_id) \
         .first()
 
-@session_wrapper
-def fetch_all(penguin_id: int, session: Session = SessionProvider) -> List[PenguinPostcard]:
+def fetch_all(session: Session, penguin_id: int) -> list[PenguinPostcard]:
     return session.query(PenguinPostcard) \
         .filter(PenguinPostcard.penguin_id == penguin_id) \
         .all()
 
-@session_wrapper
-def fetch_unread(penguin_id: int, session: Session = SessionProvider) -> List[PenguinPostcard]:
+def fetch_unread(session: Session, penguin_id: int) -> list[PenguinPostcard]:
     return session.query(PenguinPostcard) \
         .filter(PenguinPostcard.penguin_id == penguin_id) \
         .filter(PenguinPostcard.has_read == False) \

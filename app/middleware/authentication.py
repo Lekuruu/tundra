@@ -1,69 +1,77 @@
 
-from starlette.authentication import AuthenticationBackend, AuthCredentials, UnauthenticatedUser
+from collections.abc import Callable
+from typing import TypeVar
+from sqlalchemy.orm import Session
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
-from typing import Tuple
+from starlette.authentication import (
+    AuthCredentials,
+    AuthenticationBackend,
+    UnauthenticatedUser,
+)
 
-from app.data import penguins, Penguin
-from app.data import CELLOPHANE_TOKENS
-from app import api
+from app.data import CELLOPHANE_TOKENS, Penguin, penguins
+from app import api, crypto
 
-import app.crypto as crypto
 import asyncio
+import config
 import base64
 import bcrypt
-import config
+
+PenguinKey = TypeVar("PenguinKey")
 
 class AuthBackend(AuthenticationBackend):
     async def authenticate(self, request: HTTPConnection):
-        if not (authorization := request.headers.get('Authorization')):
+        if not (authorization := request.headers.get("Authorization")):
             return
 
-        authorizations = self.parse_authorization_header(
-            authorization
-        )
+        authorizations = self.parse_authorization_header(authorization)
 
-        if not (cello_token := authorizations.get('FD')):
+        if not (cello_token := authorizations.get("FD")):
             return
 
         if cello_token not in CELLOPHANE_TOKENS.values():
             return
 
-        scopes = ['application']
+        scopes = ["application"]
 
-        if 'Basic' not in authorizations:
+        if "Basic" not in authorizations:
             return AuthCredentials(scopes), UnauthenticatedUser()
 
-        data, password = self.parse_basic_authentication(
-            authorizations['Basic']
-        )
+        data, password = self.parse_basic_authentication(authorizations["Basic"])
 
         if not password:
             # No password was given, so we assume the data is a token
-            user = await self.token_authentication(data)
+            user = await self.token_authentication(request, data)
 
         else:
             # Authenticate client using username & password
-            user = await self.password_authentication(data, password)
+            user = await self.password_authentication(request, data, password)
 
         if not user:
             return AuthCredentials(scopes), UnauthenticatedUser()
 
-        scopes.append('authenticated')
+        scopes.append("authenticated")
 
         if user.active:
-            scopes.append('activated')
+            scopes.append("activated")
 
         if user.moderator:
-            scopes.append('moderator')
+            scopes.append("moderator")
 
         return AuthCredentials(scopes), user
 
-    async def password_authentication(self, username: str, password: str) -> Penguin | None:
-        loop = asyncio.get_event_loop()
-
-        penguin = await loop.run_in_executor(
-            None, penguins.fetch_by_name_case_insensitive, username
+    async def password_authentication(
+        self,
+        request: HTTPConnection,
+        username: str,
+        password: str,
+    ) -> Penguin | None:
+        penguin = await asyncio.to_thread(
+            self.fetch_penguin,
+            request,
+            penguins.fetch_by_name_case_insensitive,
+            username,
         )
 
         if not penguin:
@@ -74,10 +82,10 @@ class AuthBackend(AuthenticationBackend):
             config.STATIC_KEY
         )
 
-        password_correct = loop.run_in_executor(
-            None, bcrypt.checkpw,
-            login_hash.encode('utf-8'),
-            penguin.password.encode('utf-8')
+        password_correct = await asyncio.to_thread(
+            bcrypt.checkpw,
+            login_hash.encode("utf-8"),
+            penguin.password.encode("utf-8")
         )
 
         if not password_correct:
@@ -85,16 +93,21 @@ class AuthBackend(AuthenticationBackend):
 
         return penguin
 
-    async def token_authentication(self, token: str) -> Penguin | None:
+    async def token_authentication(
+        self,
+        request: HTTPConnection,
+        token: str,
+    ) -> Penguin | None:
         data = crypto.decode_token(token)
 
         if not data:
             return
 
-        loop = asyncio.get_event_loop()
-
-        penguin = await loop.run_in_executor(
-            None, penguins.fetch_by_id, data['id']
+        penguin = await asyncio.to_thread(
+            self.fetch_penguin,
+            request,
+            penguins.fetch_by_id,
+            data["id"],
         )
 
         if not penguin:
@@ -108,13 +121,23 @@ class AuthBackend(AuthenticationBackend):
                 key.strip(): value.strip()
                 for key, value in (
                     method.strip().split(maxsplit=1)
-                    for method in header.split(',')
+                    for method in header.split(",")
                 )
             }
         except ValueError:
             return {}
 
-    def parse_basic_authentication(self, token: str) -> Tuple[str, str]:
-        return base64.b64decode(token).decode().split(':', maxsplit=1)
+    def parse_basic_authentication(self, token: str) -> tuple[str, str]:
+        username, password = base64.b64decode(token).decode().split(":", maxsplit=1)
+        return username, password
+
+    @staticmethod
+    def fetch_penguin(
+        request: HTTPConnection,
+        fetch: Callable[[Session, PenguinKey], Penguin | None],
+        key: PenguinKey,
+    ) -> Penguin | None:
+        with request.app.state.database.managed_session() as session:
+            return fetch(session, key)
 
 api.add_middleware(AuthenticationMiddleware, backend=AuthBackend())

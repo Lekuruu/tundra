@@ -1,49 +1,40 @@
 
-from sqlalchemy.orm import Session
 from sqlalchemy import func
-
-from .wrapper import SessionProvider, session_wrapper
+from sqlalchemy.orm import Session
 from ..postgres import Penguin
 
-@session_wrapper
-def create(data: dict, session: Session = SessionProvider) -> Penguin:
+def create(session: Session, data: dict) -> Penguin:
     penguin = Penguin(**data)
     session.add(penguin)
     session.commit()
     return penguin
 
-@session_wrapper
-def fetch_by_id(id: int, session: Session = SessionProvider) -> Penguin | None:
+def fetch_by_id(session: Session, id: int) -> Penguin | None:
     return session.query(Penguin) \
         .filter(Penguin.id == id) \
         .first()
 
-@session_wrapper
-def fetch_by_name(name: str, session: Session = SessionProvider) -> Penguin | None:
+def fetch_by_name(session: Session, name: str) -> Penguin | None:
     return session.query(Penguin) \
         .filter(Penguin.username == name) \
         .first()
 
-@session_wrapper
-def fetch_by_name_case_insensitive(name: str, session: Session = SessionProvider) -> Penguin | None:
+def fetch_by_name_case_insensitive(session: Session, name: str) -> Penguin | None:
     return session.query(Penguin) \
         .filter(Penguin.username.ilike(name)) \
         .first()
 
-@session_wrapper
-def fetch_by_nickname(nickname: str, session: Session = SessionProvider) -> Penguin | None:
+def fetch_by_nickname(session: Session, nickname: str) -> Penguin | None:
     return session.query(Penguin) \
         .filter(Penguin.nickname == nickname) \
         .first()
 
-@session_wrapper
-def fetch_random(session: Session = SessionProvider) -> Penguin | None:
+def fetch_random(session: Session) -> Penguin | None:
     return session.query(Penguin) \
         .order_by(func.random()) \
         .first()
 
-@session_wrapper
-def update(id: int, updates: dict, session: Session = SessionProvider) -> int:
+def update(session: Session, id: int, updates: dict) -> int:
     rows = session.query(Penguin) \
         .filter(Penguin.id == id) \
         .update(updates)
