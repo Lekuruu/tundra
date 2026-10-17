@@ -12,6 +12,15 @@ class Outfit(BaseModel):
     flag: int
     photo: int
 
+    @field_validator("*")
+    @classmethod
+    def normalize_empty_slot(cls, item_id: int) -> int:
+        if item_id < -1:
+            raise ValueError("Outfit item IDs must be -1 or greater")
+
+        # The mobile client uses both 0 & -1 to represent an empty slot
+        return -1 if item_id == 0 else item_id
+
     @classmethod
     def deserialize(cls, value: str) -> "Outfit":
         parts = value.split("|")
@@ -23,9 +32,6 @@ class Outfit(BaseModel):
             item_ids = [int(part) for part in parts]
         except ValueError as exc:
             raise ValueError("Outfit slots must be integer item IDs") from exc
-
-        if any(item_id < -1 for item_id in item_ids):
-            raise ValueError("Outfit item IDs must be -1 or greater")
 
         return cls(**dict(zip(cls.model_fields, item_ids)))
 
