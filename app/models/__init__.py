@@ -9,7 +9,7 @@ from .account import (
 )
 from .error import ErrorResponseObject, ResponseError
 from .items import Items
-from .outfit import Outfit
+from .outfit import Outfit, OutfitPayload
 
 __all__ = [
     "Account",
@@ -19,6 +19,7 @@ __all__ = [
     "Items",
     "MPTokenResponse",
     "Outfit",
+    "OutfitPayload",
     "PlayerCardData",
     "PlayerCardOutfit",
     "ResponseError",

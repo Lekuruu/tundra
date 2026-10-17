@@ -2,8 +2,8 @@
 from starlette.authentication import requires
 from fastapi import APIRouter, Request
 
-from app.data import Penguin, items
-from app.models import Items, Outfit, PlayerCardData, PlayerCardOutfit
+from app.data import Penguin, items, penguins
+from app.models import Items, Outfit, OutfitPayload, PlayerCardData, PlayerCardOutfit
 
 router = APIRouter()
 
@@ -51,3 +51,22 @@ def player_card(request: Request) -> PlayerCardData:
         items=item_model,
         outfits=[PlayerCardOutfit(itemList=outfit.serialize())]
     )
+
+@router.put('/outfit', response_model=OutfitPayload)
+@requires('authenticated')
+def save_outfit(request: Request, payload: OutfitPayload) -> OutfitPayload:
+    user: Penguin = request.user
+    outfit = payload.outfit
+
+    penguins.update(user.id, {
+        "color": None if outfit.colour == -1 else outfit.colour,
+        "head": None if outfit.head == -1 else outfit.head,
+        "face": None if outfit.face == -1 else outfit.face,
+        "neck": None if outfit.neck == -1 else outfit.neck,
+        "body": None if outfit.body == -1 else outfit.body,
+        "hand": None if outfit.hand == -1 else outfit.hand,
+        "feet": None if outfit.feet == -1 else outfit.feet,
+        "flag": None if outfit.flag == -1 else outfit.flag,
+        "photo": None if outfit.photo == -1 else outfit.photo,
+    })
+    return OutfitPayload(outfit=outfit)
