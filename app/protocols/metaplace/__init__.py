@@ -1,18 +1,26 @@
 
-from .world import GameObject, Place, PlaceInstance, Position, World, WorldCatalog
-from .places import Camera, Camera3D, MapBlocks, Physics, PlacePresentation, Render
+from .constants import InputModifier, InputTarget, InputType
+from .places import Camera, Camera3D, InputBinding, MapBlocks, Physics, PlacePresentation, Render
+from .plugin import MetaplacePlugin, MetaplacePluginManager
 from .protocol import MetaplaceProtocol, MetaplaceProtocolFactory
+from .serialization import Command, Tag
 from .server import BasicCommandHandler, MetaplaceWorldServer
 from .session import MetaplaceSession, SessionState
-from .serialization import Command, Tag
+from .world import GameObject, Place, PlaceInstance, Position, World, WorldCatalog
 
 __all__ = (
-    'BasicWorldCommandHandler',
+    'BasicCommandHandler',
     'Camera',
     'Camera3D',
     'Command',
     'GameObject',
+    'InputBinding',
+    'InputModifier',
+    'InputTarget',
+    'InputType',
     'MapBlocks',
+    'MetaplacePlugin',
+    'MetaplacePluginManager',
     'MetaplaceProtocol',
     'MetaplaceProtocolFactory',
     'MetaplaceSession',
@@ -20,8 +28,8 @@ __all__ = (
     'Physics',
     'Place',
     'PlaceInstance',
-    'Position',
     'PlacePresentation',
+    'Position',
     'Render',
     'SessionState',
     'Tag',

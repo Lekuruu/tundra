@@ -1,50 +1,37 @@
-
+import logging
 from collections.abc import Callable
 
+from twisted.internet import reactor
 from twisted.internet.interfaces import IListeningPort
 from twisted.internet.protocol import Factory
-from twisted.internet import reactor
 
-from .world import GameObject, Position, World
-from .protocol import MetaplaceProtocol
 from .places import PlacePresentation
+from .protocol import MetaplaceProtocol
 from .serialization import Command
 from .session import SessionState
+from .world import GameObject, Position, World
 
-import logging
-
-TokenDecoder = Callable[[str], dict | None]
-
-EMPTY_TILEMAP = (
-    'iVBORw0KGgoAAAANSUhEUgAAAEAAAAAoCAAAAABrpaM1AAAANElEQVRIiWNgGAWjYBSMghEJ'
-    'GEEAhzAc4BDGqoSgykFrALo55BoAN2XUgFEDiM+Jo2BQAwDdDQLtiDfyPgAAAABJRU5ErkJggg=='
-)
-EMPTY_HEIGHTMAP = (
-    'iVBORw0KGgoAAAANSUhEUgAAAEEAAAApCAAAAABPOxuuAAAAIklEQVRIie3MIQEAAAACIKc7'
-    '3RFWGED6isFgMBgMBoPBcBgfzjTMSGY6zQAAAABJRU5ErkJggg=='
-)
-
-# taking reference from:
-# https://web.archive.org/web/20170201071457/http://protocol.clubpenguinwiki.info/wiki/Mobile_API
-# lets see what works and what doesn't ...
+PlayerAuthenticator = Callable[[str, int, str], str | None]
 
 class BasicCommandHandler:
-    """Implements the smallest mobile metaplace login and place handshake."""
+    """Implements the standard metaplace login and place handshake."""
 
     def __init__(
         self,
         world: World,
-        token_decoder: TokenDecoder,
+        authenticate_player: PlayerAuthenticator,
         presentation: PlacePresentation | None = None,
-        base_asset_url: str = ' ',
+        version: str = '',
+        base_asset_url: str = '',
     ) -> None:
         self.world = world
-        self.token_decoder = token_decoder
+        self.authenticate_player = authenticate_player
         self.presentation = presentation or PlacePresentation()
+        self.version = version
         self.base_asset_url = base_asset_url
         self.logger = logging.getLogger(f'{world.name}.commands')
 
-    def __call__(self, protocol: MetaplaceProtocol, command: Command) -> None:
+    def __call__(self, protocol: MetaplaceProtocol, command: Command) -> bool:
         handlers = {
             '/user_agent': self.handle_user_agent,
             '/version': self.handle_version,
@@ -55,10 +42,10 @@ class BasicCommandHandler:
         handler = handlers.get(command.name)
 
         if handler is None:
-            self.logger.debug('Unsupported command %s', command.name)
-            return
+            return False
 
         handler(protocol, command)
+        return True
 
     def handle_user_agent(self, protocol: MetaplaceProtocol, command: Command) -> None:
         user_agent = ' '.join(str(argument) for argument in command.arguments)
@@ -66,7 +53,7 @@ class BasicCommandHandler:
         protocol.send_tag('S_USERAGENT', 0, user_agent)
 
     def handle_version(self, protocol: MetaplaceProtocol, command: Command) -> None:
-        protocol.send_tag('S_VERSION', 'FY15-20150206 (4954)r')
+        protocol.send_tag('S_VERSION', self.version)
 
     def handle_login(self, protocol: MetaplaceProtocol, command: Command) -> None:
         protocol.send_tag('S_LOGINDEBUG', 'Got /login command from user')
@@ -83,9 +70,7 @@ class BasicCommandHandler:
             self.reject_login(protocol)
             return
 
-        # make the linter shut up already please
         arguments: list[str] = command.arguments # type: ignore
-
         server_type, player_id_input, token = arguments
 
         if not player_id_input.isdigit():
@@ -93,21 +78,13 @@ class BasicCommandHandler:
             return
 
         player_id = int(player_id_input)
-        token_data = self.token_decoder(token)
+        player_name = self.authenticate_player(server_type, player_id, token)
 
-        if token_data is None:
+        if player_name is None:
             self.reject_login(protocol)
             return
 
-        if (token_player_id := token_data.get('id')) is None:
-            self.reject_login(protocol)
-            return
-
-        if server_type.lower() != 'live' or token_player_id != player_id:
-            self.reject_login(protocol)
-            return
-
-        protocol.player_name = str(token_data.get('name', ''))
+        protocol.player_name = player_name
         protocol.session.authenticate(player_id)
         protocol.send_tag('S_LOGINDEBUG', 'Successfully verified credentials server-side')
         protocol.send_tag('S_LOGINDEBUG', 'Finalizing login, creating final user object')
@@ -127,15 +104,17 @@ class BasicCommandHandler:
             protocol.close_connection()
             return
 
-        protocol.send_tag(
-            'W_INPUT', 'use', '0:10', 2, 3, 0, 'use'
-        )
-        protocol.send_tag(
-            'W_INPUT', 'touch-the-terrain', '0:8600033', 1, 6, 0, 'path_terrain'
-        )
-        protocol.send_tag(
-            'W_INPUT', 'mouse-the-terrain', '0:8600033', 1, 3, 0, 'path_terrain'
-        )
+        for input_binding in self.presentation.inputs:
+            protocol.send_tag(
+                'W_INPUT',
+                input_binding.input_id,
+                input_binding.script_id,
+                input_binding.target.value,
+                input_binding.event.value,
+                input_binding.key_modifier.value,
+                input_binding.command,
+            )
+
         protocol.session.enter_place(place.place_id)
         self.send_place(protocol)
         self.logger.debug('Sent place data to player %s', protocol.session.player_id)
@@ -161,14 +140,15 @@ class BasicCommandHandler:
         player = GameObject(
             player_id,
             protocol.player_name,
-            '0:2480001',
-            '0:1',
+            self.presentation.player_art_id,
+            self.presentation.player_template_id,
             Position(*self.presentation.start_position),
         )
         protocol.session.show_object(player)
-        self.send_avatar_data(protocol, player_id)
+        protocol.factory.plugins.on_player_ready(protocol, player)
         protocol.send_tag('O_PLAYER', player_id)
         protocol.place_ready = True
+
         self.logger.debug(
             'Player %s is now ready in place %s',
             player_id,
@@ -176,20 +156,17 @@ class BasicCommandHandler:
         )
 
     def send_place(self, protocol: MetaplaceProtocol) -> None:
-        place = self.world.start_place
-        if place is None:
+        if protocol.session.place is None:
             return
+
+        place = protocol.session.place.place
         presentation = self.presentation
         camera = presentation.camera
         camera3d = presentation.camera3d
         physics = presentation.physics
 
-        protocol.send_tag(
-            'P_MAPBLOCK', 't', 1, 1, presentation.mapblocks.tilemap or EMPTY_TILEMAP
-        )
-        protocol.send_tag(
-            'P_MAPBLOCK', 'h', 1, 1, presentation.mapblocks.heightmap or EMPTY_HEIGHTMAP
-        )
+        protocol.send_tag('P_MAPBLOCK', 't', 1, 1, presentation.mapblocks.tilemap)
+        protocol.send_tag('P_MAPBLOCK', 'h', 1, 1, presentation.mapblocks.heightmap)
         protocol.send_tag('P_ZOOMLIMIT', *camera.zoom_lock)
         protocol.send_tag(
             'P_RENDERFLAGS', presentation.render.occlude_tiles, presentation.render.alpha_cutoff
@@ -228,7 +205,7 @@ class BasicCommandHandler:
             camera3d.camera_width,
             camera3d.camera_height,
         )
-        protocol.send_tag('UI_BGCOLOR', 255, 255, 255)
+        protocol.send_tag('UI_BGCOLOR', *presentation.background_color)
         protocol.send_tag('P_DRAG', presentation.draggable)
         protocol.send_tag('P_CAMLIMITS', *camera.margin_top_left, *camera.margin_bottom_right)
         protocol.send_tag('P_LOCKRENDERSIZE', 0, camera3d.camera_width, camera3d.camera_height)
@@ -245,35 +222,6 @@ class BasicCommandHandler:
             physics.net_bounce,
         )
         protocol.send_tag('P_ASSETSCOMPLETE', 0, 0)
-
-    @staticmethod
-    def send_avatar_data(protocol: MetaplaceProtocol, player_id: int) -> None:
-        # TODO: Add metaplace plugin system to decouple the base metaplace server from the app-specific events
-        animation_paths = {
-            'Marshmellow': '<base_asset_url>avatar/transformations/marshmellow/en_US/deploy/animation/all_platforms/all/',
-            'Olaf': '<base_asset_url>avatar/transformations/olaf/en_US/deploy/animation/all_platforms/all/',
-            'penguin': '<base_asset_url>avatar/penguin/en_US/deploy/animation/all_platforms/all/',
-            'puffle': '<base_asset_url>avatar/puffle/en_US/deploy/animation/all_platforms/all/',
-        }
-        avatar_data = {
-            'character': 'penguin',
-            'schemaJson': '<base_asset_url>avatar/jsonData/transformation_schema.json',
-            'shadow': '<base_asset_url>avatar/penguin/en_US/deploy/mesh/all_platforms/penguin_shadow.mmf',
-            'shadowFriend': '<base_asset_url>avatar/penguin/en_US/deploy/mesh/all_platforms/penguin_shadowGreen.mmf',
-            'shadowSelf': '<base_asset_url>avatar/penguin/en_US/deploy/mesh/all_platforms/penguin_shadowBlue.mmf',
-            'url': '<base_asset_url>avatar/penguin/en_US/deploy/mesh/all_platforms/penguin.mmf',
-            'zoom': '0.7',
-        }
-        protocol.session.send_client_event(
-            player_id,
-            'setAnimPaths',
-            animation_paths,
-        )
-        protocol.session.send_client_event(
-            player_id,
-            'setAvatarLoadingData',
-            avatar_data,
-        )
 
     def reject_login(self, protocol: MetaplaceProtocol) -> None:
         self.logger.warning('Rejecting login for player %s', protocol.session.player_id)

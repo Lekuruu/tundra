@@ -1,15 +1,16 @@
 
-from twisted.protocols.basic import LineOnlyReceiver
-from twisted.internet.protocol import Factory
-from collections.abc import Callable
+import logging
+from collections.abc import Callable, Iterable
 
+from twisted.internet.protocol import Factory
+from twisted.protocols.basic import LineOnlyReceiver
+
+from .plugin import MetaplacePlugin, MetaplacePluginManager
 from .serialization import AllowedValues, Command, Tag
 from .session import MetaplaceSession
 from .world import World
 
-import logging
-
-CommandHandler = Callable[['MetaplaceProtocol', Command], None]
+CommandHandler = Callable[['MetaplaceProtocol', Command], bool | None]
 
 class MetaplaceProtocol(LineOnlyReceiver):
     delimiter = b'\n'
@@ -23,6 +24,7 @@ class MetaplaceProtocol(LineOnlyReceiver):
         self.player_name = ''
         self.place_ready = False
         self.logger.info('Metaplace client connected from %s', self.transport.getPeer()) # type: ignore
+        self.factory.plugins.on_connected(self)
 
     def lineReceived(self, line: bytes) -> None:
         try:
@@ -32,7 +34,8 @@ class MetaplaceProtocol(LineOnlyReceiver):
             return
 
         self.logger.debug('Received metaplace command %s', command.name)
-        self.factory.command_handler(self, command)
+        if not self.factory.command_handler(self, command):
+            self.factory.plugins.dispatch(self, command)
 
     def sendTag(self, tag: Tag | str, *arguments: AllowedValues) -> None:
         message = tag if isinstance(tag, Tag) else Tag(tag, arguments)
@@ -40,8 +43,14 @@ class MetaplaceProtocol(LineOnlyReceiver):
         self.logger.debug('Sent metaplace tag %s', message.name)
 
     def connectionLost(self, reason=None) -> None:
-        if hasattr(self, 'session'):
-            self.logger.info('Metaplace player %s disconnected', self.session.player_id)
+        if not hasattr(self, 'session'):
+            # TODO: debug logging or sumthjing
+            return
+
+        self.logger.info('Metaplace player %s disconnected', self.session.player_id)
+        try:
+            self.factory.plugins.on_disconnected(self)
+        finally:
             self.session.close()
 
     # i like snake_case more, sorry
@@ -54,10 +63,16 @@ class MetaplaceProtocol(LineOnlyReceiver):
 class MetaplaceProtocolFactory(Factory):
     protocol = MetaplaceProtocol
 
-    def __init__(self, world: World, command_handler: CommandHandler | None = None) -> None:
+    def __init__(
+        self,
+        world: World,
+        command_handler: CommandHandler | None = None,
+        plugins: Iterable[MetaplacePlugin] = (),
+    ) -> None:
         self.world = world
         self.command_handler = command_handler or self.command_handler_stub
+        self.plugins = MetaplacePluginManager(plugins)
 
     @staticmethod
-    def command_handler_stub(protocol: MetaplaceProtocol, command: Command) -> None:
-        pass
+    def command_handler_stub(protocol: MetaplaceProtocol, command: Command) -> bool:
+        return False

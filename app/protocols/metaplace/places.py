@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 
 from .world import Place, PlaceInstance
-from .constants import ViewMode
+from .constants import InputModifier, InputTarget, InputType, ViewMode
 
 @dataclass(slots=True)
 class MapBlocks:
@@ -63,6 +63,15 @@ class Physics:
     net_friction: bool = False
     net_bounce: bool = True
 
+@dataclass(frozen=True, slots=True)
+class InputBinding:
+    input_id: str
+    script_id: str
+    target: InputTarget
+    event: InputType
+    command: str
+    key_modifier: InputModifier = InputModifier.NONE
+
 @dataclass(slots=True)
 class PlacePresentation:
     """Optional rendering data kept outside the place's domain identity."""
@@ -72,13 +81,18 @@ class PlacePresentation:
     camera: Camera = field(default_factory=Camera)
     camera3d: Camera3D = field(default_factory=Camera3D)
     physics: Physics = field(default_factory=Physics)
+    inputs: tuple[InputBinding, ...] = ()
     start_position: tuple[float, float, float] = (0, 0, 0)
+    background_color: tuple[int, int, int] = (255, 255, 255)
+    player_art_id: str = ''
+    player_template_id: str = ''
     draggable: bool = False
     object_lock: bool = False
 
 __all__ = (
     'Camera',
     'Camera3D',
+    'InputBinding',
     'MapBlocks',
     'Physics',
     'Place',
