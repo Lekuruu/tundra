@@ -1,8 +1,9 @@
 
-from starlette.exceptions import HTTPException
-from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session, sessionmaker
 from contextlib import contextmanager
+from collections.abc import Iterator
 import logging
 
 from .models import Base
@@ -51,14 +52,15 @@ class Postgres:
         return self.sessionmaker(bind=self.engine)
 
     @contextmanager
-    def managed_session(self):
+    def managed_session(self) -> Iterator[Session]:
         session = self.sessionmaker(bind=self.engine)
         try:
             yield session
-        except Exception as e:
-            if isinstance(e, HTTPException): raise
-            self.logger.fatal(f'Transaction failed: {e}', exc_info=e)
-            self.logger.fatal('Performing rollback...')
+        except SQLAlchemyError:
+            self.logger.exception('Database transaction failed. Performing rollback...')
+            session.rollback()
+            raise
+        except Exception:
             session.rollback()
             raise
         finally:
