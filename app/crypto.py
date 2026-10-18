@@ -23,7 +23,7 @@ def generate_token(user: Penguin) -> str:
         algorithm='HS256'
     )
 
-def decode_token(token: str) -> dict:
+def decode_token(token: str) -> dict | None:
     try:
         data = jwt.decode(
             token,
@@ -31,7 +31,7 @@ def decode_token(token: str) -> dict:
             algorithms=['HS256']
         )
     except jwt.PyJWTError:
-        return
+        return None
 
     # Check if the token is expired
     if data['exp'] < round(time.time()):
@@ -40,10 +40,10 @@ def decode_token(token: str) -> dict:
     return data
 
 def get_hash(undigested: Union[str, int, bytes]) -> str:
-    if type(undigested) == str:
+    if isinstance(undigested, str):
         undigested = undigested.encode('utf-8')
 
-    elif type(undigested) == int:
+    if isinstance(undigested, int):
         undigested = str(undigested).encode('utf-8')
 
     return md5(undigested).hexdigest()
