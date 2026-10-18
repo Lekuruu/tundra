@@ -1,4 +1,5 @@
 
+from typing import Optional
 from enum import IntEnum
 
 class SystemLanguage(IntEnum):
@@ -47,6 +48,20 @@ class SystemLanguage(IntEnum):
     @property
     def code(self) -> str:
         return SystemLanguageCodes.get(self, 'xx')
+
+    @classmethod
+    def _missing_(cls, value: object) -> Optional["SystemLanguage"]:
+        if not isinstance(value, str):
+            return None
+
+        return next(
+            (
+                # Accept 2-letter country codes for language
+                language for language, language_code in SystemLanguageCodes.items()
+                if language_code == value.strip().casefold()
+            ),
+            None,
+        )
 
 SystemLanguageCodes = {
     SystemLanguage.Afrikaans: 'af',

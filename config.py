@@ -1,6 +1,7 @@
 
 import dotenv
 import os
+from urllib.parse import urlparse
 
 dotenv.load_dotenv(override=False)
 
@@ -41,3 +42,12 @@ API_BASEURL = os.environ.get('API_BASEURL', f'{PROTOCOL}://api.{WEB_DOMAIN}')
 MEDIA1_BASEURL = os.environ.get('MEDIA1_BASEURL', f'{PROTOCOL}://media.{WEB_DOMAIN}')
 MEDIA8_BASEURL = os.environ.get('MEDIA8_BASEURL', f'{PROTOCOL}://media.{WEB_DOMAIN}')
 WNS_URL = os.environ.get('WNS_URL', f'{PROTOCOL}://n7vcp1clubpwns.{WEB_DOMAIN}')
+
+METAPLACE_HOST = os.environ.get('METAPLACE_HOST', urlparse(WNS_URL).hostname or 'localhost')
+METAPLACE_BIND_HOST = os.environ.get('METAPLACE_BIND_HOST', '0.0.0.0')
+METAPLACE_PORT = int(os.environ.get('METAPLACE_PORT', '7003'))
+METAPLACE_WORLD_NAME = os.environ.get('METAPLACE_WORLD_NAME', 'clubpenguin_town_en_3')
+METAPLACE_WORLD_ID = int(os.environ.get('METAPLACE_WORLD_ID', '13434341'))
+METAPLACE_WORLD_OWNER = os.environ.get('METAPLACE_WORLD_OWNER', 'crowdcontrol')
+METAPLACE_STYLESHEET_ID = os.environ.get('METAPLACE_STYLESHEET_ID', '200.5991')
+METAPLACE_START_PLACE_ID = int(os.environ.get('METAPLACE_START_PLACE_ID', '113140001'))

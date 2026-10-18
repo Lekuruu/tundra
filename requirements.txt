@@ -8,3 +8,4 @@ uvicorn==0.54.0
 bcrypt==5.0.0
 PyJWT==2.15.1
 redis==6.4.0
+twisted==26.4.0

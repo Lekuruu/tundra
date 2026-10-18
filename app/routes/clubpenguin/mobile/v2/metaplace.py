@@ -14,7 +14,7 @@ router = APIRouter()
 @requires('authenticated')
 def mp_session_token(
     request: Request,
-    language: Annotated[str, Query()], # TODO: map to SystemLanguage enum w/ country codes
+    language: Annotated[SystemLanguage, Query()],
     product: Annotated[str, Query()],
 ) -> MPTokenResponse:
     # TODO: Use same format as dash perhaps ?
