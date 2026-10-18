@@ -1,4 +1,5 @@
-from app.protocols.metaplace import (
+
+from app.metaplace import (
     GameObject,
     MetaplacePlugin,
     MetaplaceProtocol,
