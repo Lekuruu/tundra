@@ -120,6 +120,19 @@ class MetaplaceSession:
         game_object.move(x, y, z)
         self.emit('O_MOVE', object_id, x, y, z)
 
+    def path_object(
+        self,
+        object_id: int,
+        x: float,
+        y: float,
+        z: float,
+        duration: int,
+        replace: bool = True,
+    ) -> None:
+        game_object = self.require_object(object_id)
+        game_object.move(x, y, z)
+        self.emit('O_PATH', object_id, x, y, z, duration, replace)
+
     def remove_object(self, object_id: int) -> GameObject:
         if self.place is None:
             raise RuntimeError('Session has no active place')
