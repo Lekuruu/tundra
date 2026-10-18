@@ -33,14 +33,15 @@ class MetaplaceProtocol(LineOnlyReceiver):
             self.close_connection()
             return
 
-        self.logger.debug('Received metaplace command %s', command.name)
+        self.logger.debug('-> %r', command)
+
         if not self.factory.command_handler(self, command):
             self.factory.plugins.dispatch(self, command)
 
     def sendTag(self, tag: Tag | str, *arguments: AllowedValues) -> None:
         message = tag if isinstance(tag, Tag) else Tag(tag, arguments)
         self.transport.write(message.encode()) # type: ignore
-        self.logger.debug('Sent metaplace tag %s', message.name)
+        self.logger.debug('<- %r', message)
 
     def connectionLost(self, reason=None) -> None:
         if not hasattr(self, 'session'):
