@@ -35,6 +35,7 @@ class Camera:
     move_recenter: int = 0
     height_map_divisions: int = 1
     height_map_scale: float = 0.5
+    height_map_offset: float = 0
     margin_top_left: tuple[int, int] = (0, 0)
     margin_bottom_right: tuple[int, int] = (0, 0)
 
@@ -52,8 +53,10 @@ class Camera3D:
     aspect: int = 0
     vertical_fov: int = 0
     focal_length: int = 864397819904
-    camera_width: int = 1024
-    camera_height: int = 768
+    camera_width: int = 0
+    camera_height: int = 0
+    render_width: int = 1024
+    render_height: int = 768
 
 @dataclass(slots=True)
 class Physics:
@@ -65,6 +68,41 @@ class Physics:
     net_height: int = 0
     net_friction: bool = False
     net_bounce: bool = True
+
+@dataclass(frozen=True, slots=True)
+class BackgroundSprite:
+    sprite_id: str = '-1:-1'
+    depth: int = 0
+    x: float = 0
+    y: float = 0
+
+@dataclass(frozen=True, slots=True)
+class TileDefinition:
+    tile_id: int
+    name: str
+    blocking: bool
+    url: str = ''
+    blend: int = 1
+    legacy_enabled: bool = True
+    legacy_sprite_id: str = '-1:-1'
+    mode: int = 0
+    friction: float = 0
+    bounce: float = 0
+    sprite_id: str = '-1:-1'
+
+@dataclass(frozen=True, slots=True)
+class PathLayer:
+    layer_id: int
+    blocking: bool
+    cost: float
+    mode: int
+    name: str
+
+@dataclass(frozen=True, slots=True)
+class PathLayerTile:
+    layer_id: int
+    tile_id: int
+    cost: float
 
 @dataclass(frozen=True, slots=True)
 class InputBinding:
@@ -85,19 +123,28 @@ class PlacePresentation:
     camera3d: Camera3D = field(default_factory=Camera3D)
     physics: Physics = field(default_factory=Physics)
     inputs: tuple[InputBinding, ...] = ()
+    background_sprite: BackgroundSprite | None = None
+    tiles: tuple[TileDefinition, ...] = ()
+    path_layers: tuple[PathLayer, ...] = ()
+    path_layer_tiles: tuple[PathLayerTile, ...] = ()
     start_position: tuple[float, float, float] = (0, 0, 0)
     background_color: tuple[int, int, int] = (255, 255, 255)
     player_art_id: str = ''
     player_template_id: str = ''
+    player_facing: float = 0
     draggable: bool = False
     object_lock: bool = False
 
 __all__ = (
+    'BackgroundSprite',
     'Camera',
     'Camera3D',
     'InputBinding',
     'MapBlocks',
+    'PathLayer',
+    'PathLayerTile',
     'Physics',
     'PlacePresentation',
     'Render',
+    'TileDefinition',
 )

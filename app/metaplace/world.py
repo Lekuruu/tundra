@@ -59,6 +59,9 @@ class PlaceInstance:
 
         return self.upsert_object(game_object)
 
+    def next_object_id(self) -> int:
+        return max(self._objects, default=0) + 1
+
     def upsert_object(self, game_object: GameObject) -> GameObject:
         self._objects[game_object.object_id] = game_object
         return game_object

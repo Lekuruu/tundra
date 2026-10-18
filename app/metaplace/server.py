@@ -1,5 +1,8 @@
 
+import logging
 from collections.abc import Callable
+from math import hypot
+
 from twisted.internet import reactor
 from twisted.internet.interfaces import IListeningPort
 from twisted.internet.protocol import Factory
@@ -8,8 +11,6 @@ from .protocol import MetaplaceProtocol
 from .serialization import Command
 from .session import SessionState
 from .world import GameObject, Position, World
-
-import logging
 
 PlayerAuthenticator = Callable[[str, int, str], str | None]
 
@@ -36,6 +37,7 @@ class BasicCommandHandler:
             '/login': self.handle_login,
             '/ready': self.handle_ready,
             '/place_ready': self.handle_place_ready,
+            'path_terrain': self.handle_path_terrain,
         }
         handler = handlers.get(command.name)
 
@@ -88,8 +90,8 @@ class BasicCommandHandler:
         protocol.send_tag('S_LOGINDEBUG', 'Finalizing login, creating final user object')
         protocol.session.enter_world()
         protocol.send_tag('W_BASEASSETURL', self.base_asset_url)
-        protocol.send_tag('W_DISPLAYSTATE')
-        protocol.send_tag('W_ASSETSCOMPLETE', player_id)
+        protocol.send_tag('W_DISPLAYSTATE', player_name)
+        protocol.send_tag('W_ASSETSCOMPLETE', player_id, player_name)
 
     def handle_ready(self, protocol: MetaplaceProtocol, command: Command) -> None:
         if protocol.session.state is not SessionState.IN_WORLD:
@@ -111,6 +113,7 @@ class BasicCommandHandler:
                 input_binding.event.value,
                 input_binding.key_modifier.value,
                 input_binding.command,
+                None,
             )
 
         protocol.session.enter_place(place)
@@ -136,22 +139,69 @@ class BasicCommandHandler:
         protocol.send_tag('P_LOCKZOOM', camera.lock_zoom)
         protocol.send_tag('P_LOCKCAMERA', camera.lock_camera)
 
+        player_object_id = protocol.session.place.next_object_id()
         player = GameObject(
-            player_id,
+            player_object_id,
             protocol.player_name,
             presentation.player_art_id,
             presentation.player_template_id,
             Position(*presentation.start_position),
+            facing=presentation.player_facing,
         )
+        protocol.session.player_object_id = player_object_id
         protocol.session.show_object(player)
         protocol.factory.plugins.on_player_ready(protocol, player)
-        protocol.send_tag('O_PLAYER', player_id)
+        protocol.send_tag('O_PLAYER', player_object_id, protocol.player_name)
         protocol.place_ready = True
 
         self.logger.debug(
             'Player %s is now ready in place %s',
             player_id,
             protocol.session.place.place.place_id,
+        )
+
+    def handle_path_terrain(self, protocol: MetaplaceProtocol, command: Command) -> None:
+        if protocol.session.state is not SessionState.PLACE_READY or not protocol.place_ready:
+            return
+
+        if len(command.arguments) != 2:
+            return
+
+        tile_x_input, tile_y_input = command.arguments
+        if not isinstance(tile_x_input, str) or not isinstance(tile_y_input, str):
+            return
+
+        try:
+            tile_x = int(tile_x_input)
+            tile_y = int(tile_y_input)
+        except ValueError:
+            return
+
+        if protocol.session.place is None or protocol.session.player_object_id is None:
+            return
+
+        place = protocol.session.place.place
+        if not 0 <= tile_x < place.width or not 0 <= tile_y < place.height:
+            return
+
+        player = protocol.session.require_object(protocol.session.player_object_id)
+        destination_x = tile_x + 0.5
+        destination_y = tile_y + 0.5
+
+        distance = hypot(
+            destination_x - player.position.x,
+            destination_y - player.position.y,
+        )
+        if distance == 0:
+            return
+
+        duration = round(distance * 125)
+        protocol.session.path_object(
+            player.object_id,
+            destination_x,
+            destination_y,
+            128,
+            duration,
         )
 
     def send_place(self, protocol: MetaplaceProtocol) -> None:
@@ -184,7 +234,9 @@ class BasicCommandHandler:
             camera.move_rate,
             camera.move_recenter,
         )
-        protocol.send_tag('P_HEIGHTMAPSCALE', camera.height_map_scale)
+        protocol.send_tag(
+            'P_HEIGHTMAPSCALE', camera.height_map_scale, camera.height_map_offset
+        )
         protocol.send_tag('P_HEIGHTMAPDIVISIONS', camera.height_map_divisions)
         protocol.send_tag(
             'P_CAMERA3D',
@@ -207,8 +259,44 @@ class BasicCommandHandler:
         protocol.send_tag('UI_BGCOLOR', *presentation.background_color)
         protocol.send_tag('P_DRAG', presentation.draggable)
         protocol.send_tag('P_CAMLIMITS', *camera.margin_top_left, *camera.margin_bottom_right)
-        protocol.send_tag('P_LOCKRENDERSIZE', 0, camera3d.camera_width, camera3d.camera_height)
+        protocol.send_tag('P_LOCKRENDERSIZE', 0, camera3d.render_width, camera3d.render_height)
         protocol.send_tag('P_LOCKOBJECTS', presentation.object_lock)
+
+        if presentation.background_sprite is not None:
+            background = presentation.background_sprite
+            protocol.send_tag(
+                'UI_BGSPRITE', background.sprite_id, background.depth, background.x, background.y
+            )
+
+        for tile in presentation.tiles:
+            protocol.send_tag(
+                'P_TILE',
+                tile.tile_id,
+                tile.url,
+                tile.blocking,
+                tile.blend,
+                tile.legacy_enabled,
+                tile.legacy_sprite_id,
+                tile.name,
+                tile.mode,
+                tile.friction,
+                tile.bounce,
+                tile.sprite_id,
+            )
+
+        for layer in presentation.path_layers:
+            protocol.send_tag(
+                'P_PATHLAYER',
+                layer.layer_id,
+                layer.blocking,
+                layer.cost,
+                layer.mode,
+                layer.name,
+            )
+
+        for tile in presentation.path_layer_tiles:
+            protocol.send_tag('P_PATHLAYERTILE', tile.layer_id, tile.tile_id, tile.cost)
+
         protocol.send_tag(
             'P_PHYSICS',
             physics.gravity,

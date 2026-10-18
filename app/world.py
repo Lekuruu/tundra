@@ -1,13 +1,17 @@
 
 from app.metaplace import (
+    BackgroundSprite,
     Camera,
     Camera3D,
     InputBinding,
     InputTarget,
     InputType,
     MapBlocks,
+    PathLayer,
+    PathLayerTile,
     Place,
     PlacePresentation,
+    TileDefinition,
     World,
     WorldCatalog,
 )
@@ -67,10 +71,11 @@ def create_place_presentation() -> PlacePresentation:
             lock_camera=True,
             lock_zoom=True,
             height_map_scale=0.078125,
+            height_map_offset=128,
         ),
         camera3d=Camera3D(
-            camera_width=1024,
-            camera_height=640,
+            render_width=1024,
+            render_height=640,
         ),
         inputs=(
             InputBinding(
@@ -95,7 +100,27 @@ def create_place_presentation() -> PlacePresentation:
                 'path_terrain',
             ),
         ),
-        start_position=(3, 7, 0),
+        background_sprite=BackgroundSprite(),
+        tiles=(
+            TileDefinition(
+                0,
+                'blocking',
+                True,
+                legacy_sprite_id='0:2',
+                sprite_id='0:48340034',
+            ),
+            TileDefinition(
+                1,
+                'clear',
+                False,
+                legacy_sprite_id='0:10',
+                sprite_id='0:48340035',
+            ),
+        ),
+        path_layers=(PathLayer(0, False, 1, 1, 'Player Pathing Layer'),),
+        path_layer_tiles=(PathLayerTile(0, 0, 0),),
+        start_position=(35, 25, 0),
         player_art_id='0:2480001',
         player_template_id='0:1',
+        player_facing=90,
     )

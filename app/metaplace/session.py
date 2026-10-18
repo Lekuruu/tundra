@@ -27,6 +27,7 @@ class MetaplaceSession:
     world: World
     emit: TagEmitter
     player_id: int | None = None
+    player_object_id: int | None = None
     state: SessionState = SessionState.CONNECTED
     place: PlaceInstance | None = None
 
@@ -47,6 +48,7 @@ class MetaplaceSession:
         self.emit(
             'S_LOGIN',
             self.player_id,
+            None,
         )
         self.emit(
             'S_WORLDTYPE',
@@ -96,7 +98,7 @@ class MetaplaceSession:
             game_object.position.y,
             game_object.position.z,
             1, # TODO
-            0, # TODO
+            game_object.facing,
             0, # TODO
             0, # TODO
             game_object.name,
@@ -104,15 +106,6 @@ class MetaplaceSession:
             int(game_object.blocking),
             1, # TODO
             0, # TODO
-        )
-
-        if not game_object.facing:
-            return
-
-        self.emit(
-            'O_YAW',
-            game_object.object_id,
-            game_object.facing
         )
 
     def move_object(self, object_id: int, x: float, y: float, z: float = 0) -> None:
@@ -157,6 +150,13 @@ class MetaplaceSession:
         self.emit('O_CLIENTEVENT', object_id, name, payload)
 
     def close(self) -> None:
+        if self.place is not None and self.player_object_id is not None:
+            try:
+                self.place.remove_object(self.player_object_id)
+            except KeyError:
+                pass
+
+        self.player_object_id = None
         self.state = SessionState.CLOSED
         self.place = None
 

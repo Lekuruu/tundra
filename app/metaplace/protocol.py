@@ -40,7 +40,8 @@ class MetaplaceProtocol(LineOnlyReceiver):
 
     def sendTag(self, tag: Tag | str, *arguments: AllowedValues) -> None:
         message = tag if isinstance(tag, Tag) else Tag(tag, arguments)
-        self.transport.write(message.encode()) # type: ignore
+        encoded = message.encode()
+        self.transport.write(encoded) # type: ignore
         self.logger.debug('<- %r', message)
 
     def connectionLost(self, reason=None) -> None:

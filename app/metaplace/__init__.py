@@ -1,6 +1,6 @@
 
 from .constants import InputModifier, InputTarget, InputType
-from .places import Camera, Camera3D, InputBinding, MapBlocks, Physics, PlacePresentation, Render
+from .places import BackgroundSprite, Camera, Camera3D, InputBinding, MapBlocks, PathLayer, PathLayerTile, Physics, PlacePresentation, Render, TileDefinition
 from .plugin import MetaplacePlugin, MetaplacePluginManager
 from .protocol import MetaplaceProtocol, MetaplaceProtocolFactory
 from .serialization import Command, Tag
@@ -10,6 +10,7 @@ from .world import GameObject, Place, PlaceInstance, Position, World, WorldCatal
 
 __all__ = (
     'BasicCommandHandler',
+    'BackgroundSprite',
     'Camera',
     'Camera3D',
     'Command',
@@ -25,6 +26,8 @@ __all__ = (
     'MetaplaceProtocolFactory',
     'MetaplaceSession',
     'MetaplaceWorldServer',
+    'PathLayer',
+    'PathLayerTile',
     'Physics',
     'Place',
     'PlaceInstance',
@@ -33,6 +36,7 @@ __all__ = (
     'Render',
     'SessionState',
     'Tag',
+    'TileDefinition',
     'World',
     'WorldCatalog',
 )

@@ -6,11 +6,13 @@ from typing import Any
 # beware of the hacky mess that is following here
 # i really hate the way of decoding / encoding this
 
-AllowedValues = str | int | float | bool | None
+AllowedValues = str | int | float | bool | dict | None
 
 def encode_value(value: AllowedValues) -> str:
     if value is None:
         return ''
+    if isinstance(value, dict):
+        return json.dumps(value, separators=(',', ':'))
     if isinstance(value, bool):
         return str(int(value))
     return str(value)
@@ -21,15 +23,15 @@ class Tag:
     arguments: tuple[AllowedValues, ...] = ()
 
     def encode(self) -> bytes:
-        # e.g. Tag('S_WORLDTYPE', (0, 1, 0)) becomes b'[S_WORLDTYPE]|0|1|0|\r\n'
+        # e.g. Tag('S_WORLDTYPE', (0, 1, 0)) becomes b'[S_WORLDTYPE]|0|1|0\r\n'
         values = '|'.join(encode_value(value) for value in self.arguments)
-        suffix = f'|{values}|' if self.arguments else '|'
+        suffix = f'|{values}' if self.arguments else ''
         return f'[{self.name}]{suffix}\r\n'.encode()
 
     @classmethod
     def decode(cls, data: bytes | str) -> "Tag":
         text = data.decode('utf-8') if isinstance(data, bytes) else data
-        text = text.strip()
+        text = text.rstrip('\r\n')
 
         if not text.startswith('[') or ']' not in text:
             raise ValueError('Invalid metaplace tag')
@@ -38,10 +40,10 @@ class Tag:
         name = text[1:closing]
         payload = text[closing + 1:]
 
-        if payload == '|':
+        if not payload:
             arguments = ()
-        elif payload.startswith('|') and payload.endswith('|'):
-            arguments = tuple(payload[1:-1].split('|'))
+        elif payload.startswith('|'):
+            arguments = tuple(payload[1:].split('|'))
         else:
             raise ValueError('Invalid metaplace tag payload')
 
