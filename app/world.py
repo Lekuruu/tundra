@@ -32,12 +32,13 @@ def create_world() -> World:
         owner=config.METAPLACE_WORLD_OWNER,
         stylesheet_id=config.METAPLACE_STYLESHEET_ID,
     )
-    world.add_place(Place(
+    place = Place(
         place_id=config.METAPLACE_START_PLACE_ID,
         name='clubpenguin_town',
         width=64,
         height=40,
-    ), start=True)
+    )
+    world.add_place(place, start=True)
     return world
 
 def create_world_catalog() -> WorldCatalog:
@@ -66,7 +67,13 @@ def create_place_presentation() -> PlacePresentation:
             camera_height=640,
         ),
         inputs=(
-            InputBinding('use', '0:10', InputTarget.GOB, InputType.MOUSE_CLICK, 'use'),
+            InputBinding(
+                'use',
+                '0:10',
+                InputTarget.GOB,
+                InputType.MOUSE_CLICK,
+                'use'
+            ),
             InputBinding(
                 'touch-the-terrain',
                 '0:8600033',
