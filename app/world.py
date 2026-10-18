@@ -1,7 +1,5 @@
 
-import config
-
-from app.protocols.metaplace import (
+from app.metaplace import (
     Camera,
     Camera3D,
     InputBinding,
@@ -13,6 +11,7 @@ from app.protocols.metaplace import (
     World,
     WorldCatalog,
 )
+import config
 
 CLIENT_VERSION = 'FY15-20150206 (4954)r'
 BASE_ASSET_URL = ' '

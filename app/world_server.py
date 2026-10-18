@@ -1,14 +1,10 @@
 
-import config
-
-from app import security
-from app.protocols.metaplace.plugins import CompanionAppPlugin
-from app.protocols.metaplace import (
-    BasicCommandHandler,
-    MetaplaceProtocolFactory,
-    MetaplaceWorldServer,
-)
 from app.world import BASE_ASSET_URL, CLIENT_VERSION, create_place_presentation, create_world
+from app.metaplace import BasicCommandHandler, MetaplaceProtocolFactory, MetaplaceWorldServer
+from app.metaplace.plugins import CompanionAppPlugin
+from app import security
+
+import config
 
 def authenticate_player(server_type: str, player_id: int, token: str) -> str | None:
     if server_type.lower() != 'live':
