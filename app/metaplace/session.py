@@ -4,7 +4,7 @@ from typing import Protocol, Any
 from enum import Enum
 
 from .serialization import AllowedValues
-from .world import GameObject, Identifier, PlaceInstance, World
+from .world import GameObject, PlaceInstance, World
 
 import json
 
@@ -58,7 +58,7 @@ class MetaplaceSession:
             'S_WORLD',
             self.world.world_id,
             self.world.name,
-            f'0:{self.world.start_place_id}',
+            self.world.start_place_id,
             self.world.development_mode,
             'none', # TODO
             0, # TODO
@@ -70,22 +70,15 @@ class MetaplaceSession:
         )
         self.state = SessionState.IN_WORLD
 
-    def enter_place(
-        self,
-        place_id: Identifier,
-        instance_id: Identifier = 0,
-        player_object_id: int = 0,
-    ) -> PlaceInstance:
+    def enter_place(self, place: PlaceInstance) -> PlaceInstance:
         if self.state not in (SessionState.IN_WORLD, SessionState.PLACE_READY):
             raise RuntimeError('Session must be in the world before entering a place')
 
-        self.place = self.world.require_place(place_id).instance(instance_id)
-        encoded_place_id = str(place_id)
+        if self.world.get_place(place.place.place_id) is not place.place:
+            raise ValueError('Place instance does not belong to this world')
 
-        if ':' not in encoded_place_id:
-            encoded_place_id = f'0:{encoded_place_id}'
-
-        self.emit('W_PLACE', encoded_place_id, player_object_id, instance_id)
+        self.place = place
+        self.emit('W_PLACE', place.place.place_id, place.object_id, place.instance_id)
         self.state = SessionState.PLACE_READY
         return self.place
 

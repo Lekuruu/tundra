@@ -97,10 +97,10 @@ class BasicCommandHandler:
         if protocol.session.state is not SessionState.IN_WORLD:
             return
 
-        place = self.world.start_place
+        place = self.world.entry_place
 
         if place is None:
-            self.logger.error('No start place defined for world %s', self.world.name)
+            self.logger.error('No entry place defined for world %s', self.world.name)
             protocol.close_connection()
             return
 
@@ -115,7 +115,7 @@ class BasicCommandHandler:
                 input_binding.command,
             )
 
-        protocol.session.enter_place(place.place_id)
+        protocol.session.enter_place(place)
         self.send_place(protocol)
         self.logger.debug('Sent place data to player %s', protocol.session.player_id)
 

@@ -15,6 +15,8 @@ import config
 
 CLIENT_VERSION = 'FY15-20150206 (4954)r'
 BASE_ASSET_URL = ' '
+TOWN_PLACE_ID = '0:205790002'
+TOWN_PLACE_OBJECT_ID = 2
 
 EMPTY_TILEMAP = (
     'iVBORw0KGgoAAAANSUhEUgAAAEAAAAAoCAAAAABrpaM1AAAANElEQVRIiWNgGAWjYBSMghEJ'
@@ -31,14 +33,16 @@ def create_world() -> World:
         name=config.METAPLACE_WORLD_NAME,
         owner=config.METAPLACE_WORLD_OWNER,
         stylesheet_id=config.METAPLACE_STYLESHEET_ID,
+        start_place_id=f'0:{config.METAPLACE_START_PLACE_ID}',
     )
     place = Place(
-        place_id=config.METAPLACE_START_PLACE_ID,
+        place_id=TOWN_PLACE_ID,
         name='clubpenguin_town',
         width=64,
         height=40,
     )
-    world.add_place(place, start=True)
+    world.add_place(place)
+    world.set_entry_place(place.place_id, object_id=TOWN_PLACE_OBJECT_ID)
     return world
 
 def create_world_catalog() -> WorldCatalog:

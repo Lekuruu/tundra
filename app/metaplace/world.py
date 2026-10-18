@@ -35,10 +35,11 @@ class GameObject:
 
 @dataclass(slots=True)
 class PlaceInstance:
-    """Represents a live instance of a place definiton."""
+    """Represents a live instance of a place definition."""
 
     place: "Place"
-    instance_id: Identifier = 0
+    object_id: int = 0
+    instance_id: str = '0'
 
     _objects: dict[int, GameObject] = field(
         default_factory=dict,
@@ -73,7 +74,7 @@ class PlaceInstance:
 class Place:
     """A reusable place definition for a metaplace world."""
 
-    place_id: Identifier
+    place_id: str
     name: str
     description: str = ''
     width: int = 0
@@ -90,26 +91,39 @@ class Place:
     )
 
     @property
-    def id(self) -> Identifier:
+    def id(self) -> str:
         return self.place_id
 
     @property
     def instances(self) -> tuple[PlaceInstance, ...]:
         return tuple(self._instances.values())
 
-    def instance(self, instance_id: Identifier = 0) -> PlaceInstance:
-        key = str(instance_id)
+    def instance(
+        self,
+        instance_id: str = '0',
+        *,
+        object_id: int | None = None,
+    ) -> PlaceInstance:
+        if (instance := self._instances.get(instance_id)) is not None:
+            if object_id is not None and instance.object_id != object_id:
+                raise ValueError(
+                    f'Place instance {self.place_id}/{instance_id} already uses object {instance.object_id}'
+                )
+            return instance
 
-        if key not in self._instances:
-            self._instances[key] = PlaceInstance(self, instance_id)
+        instance = PlaceInstance(
+            self,
+            object_id=object_id if object_id is not None else 0,
+            instance_id=instance_id,
+        )
+        self._instances[instance_id] = instance
+        return instance
 
-        return self._instances[key]
-
-    def remove_instance(self, instance_id: Identifier) -> PlaceInstance:
+    def remove_instance(self, instance_id: str) -> PlaceInstance:
         try:
-            return self._instances.pop(str(instance_id))
+            return self._instances.pop(instance_id)
         except KeyError:
-            raise KeyError(f'Place instance {self.place_id}:{instance_id} does not exist') from None
+            raise KeyError(f'Place instance {self.place_id}/{instance_id} does not exist') from None
 
 @dataclass(slots=True)
 class World:
@@ -117,7 +131,7 @@ class World:
     name: str
     owner: str = ''
     stylesheet_id: str = ''
-    start_place_id: Identifier | None = None
+    start_place_id: str | None = None
     clean_name: str = ''
     development_mode: str = '0'
     server_type: int = 0
@@ -127,6 +141,11 @@ class World:
         default_factory=dict,
         init=False,
         repr=False
+    )
+    _entry_place: PlaceInstance | None = field(
+        default=None,
+        init=False,
+        repr=False,
     )
 
     @property
@@ -138,26 +157,33 @@ class World:
         return tuple(self._places.values())
 
     @property
-    def start_place(self) -> Place | None:
-        if self.start_place_id is None:
-            return None
-        return self.get_place(self.start_place_id)
+    def entry_place(self) -> PlaceInstance | None:
+        return self._entry_place
 
-    def add_place(self, place: Place, *, start: bool = False) -> Place:
-        key = str(place.place_id)
-        if key in self._places:
+    def add_place(self, place: Place) -> Place:
+        if place.place_id in self._places:
             raise ValueError(f'Place {place.place_id} already exists')
 
-        self._places[key] = place
-        if start or self.start_place_id is None:
-            self.start_place_id = place.place_id
-
+        self._places[place.place_id] = place
         return place
 
-    def get_place(self, place_id: Identifier) -> Place | None:
-        return self._places.get(str(place_id))
+    def set_entry_place(
+        self,
+        place_id: str,
+        *,
+        object_id: int = 0,
+        instance_id: str = '0',
+    ) -> PlaceInstance:
+        self._entry_place = self.require_place(place_id).instance(
+            instance_id,
+            object_id=object_id,
+        )
+        return self._entry_place
 
-    def require_place(self, place_id: Identifier) -> Place:
+    def get_place(self, place_id: str) -> Place | None:
+        return self._places.get(place_id)
+
+    def require_place(self, place_id: str) -> Place:
         place = self.get_place(place_id)
         if place is None:
             raise KeyError(f'Place {place_id} does not exist in world {self.name}')
