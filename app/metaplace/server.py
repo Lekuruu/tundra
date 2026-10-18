@@ -1,15 +1,15 @@
-import logging
-from collections.abc import Callable
 
+from collections.abc import Callable
 from twisted.internet import reactor
 from twisted.internet.interfaces import IListeningPort
 from twisted.internet.protocol import Factory
 
-from .places import PlacePresentation
 from .protocol import MetaplaceProtocol
 from .serialization import Command
 from .session import SessionState
 from .world import GameObject, Position, World
+
+import logging
 
 PlayerAuthenticator = Callable[[str, int, str], str | None]
 
@@ -20,13 +20,11 @@ class BasicCommandHandler:
         self,
         world: World,
         authenticate_player: PlayerAuthenticator,
-        presentation: PlacePresentation | None = None,
         version: str = '',
         base_asset_url: str = '',
     ) -> None:
         self.world = world
         self.authenticate_player = authenticate_player
-        self.presentation = presentation or PlacePresentation()
         self.version = version
         self.base_asset_url = base_asset_url
         self.logger = logging.getLogger(f'{world.name}.commands')
@@ -104,7 +102,7 @@ class BasicCommandHandler:
             protocol.close_connection()
             return
 
-        for input_binding in self.presentation.inputs:
+        for input_binding in place.place.presentation.inputs:
             protocol.send_tag(
                 'W_INPUT',
                 input_binding.input_id,
@@ -131,7 +129,8 @@ class BasicCommandHandler:
             protocol.close_connection()
             return
 
-        camera = self.presentation.camera
+        presentation = protocol.session.place.place.presentation
+        camera = presentation.camera
         protocol.send_tag('P_CAMERA', *camera.position, 0, 1)
         protocol.send_tag('P_ZOOM', camera.zoom)
         protocol.send_tag('P_LOCKZOOM', camera.lock_zoom)
@@ -140,9 +139,9 @@ class BasicCommandHandler:
         player = GameObject(
             player_id,
             protocol.player_name,
-            self.presentation.player_art_id,
-            self.presentation.player_template_id,
-            Position(*self.presentation.start_position),
+            presentation.player_art_id,
+            presentation.player_template_id,
+            Position(*presentation.start_position),
         )
         protocol.session.show_object(player)
         protocol.factory.plugins.on_player_ready(protocol, player)
@@ -160,7 +159,7 @@ class BasicCommandHandler:
             return
 
         place = protocol.session.place.place
-        presentation = self.presentation
+        presentation = place.presentation
         camera = presentation.camera
         camera3d = presentation.camera3d
         physics = presentation.physics

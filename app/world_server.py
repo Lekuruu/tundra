@@ -1,5 +1,5 @@
 
-from app.world import BASE_ASSET_URL, CLIENT_VERSION, create_place_presentation, create_world
+from app.world import BASE_ASSET_URL, CLIENT_VERSION, create_world
 from app.metaplace import BasicCommandHandler, MetaplaceProtocolFactory, MetaplaceWorldServer
 from app.metaplace.plugins import CompanionAppPlugin
 from app import security
@@ -22,7 +22,6 @@ def create_world_server() -> MetaplaceWorldServer:
     command_handler = BasicCommandHandler(
         world,
         authenticate_player,
-        create_place_presentation(),
         version=CLIENT_VERSION,
         base_asset_url=BASE_ASSET_URL,
     )

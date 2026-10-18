@@ -13,7 +13,9 @@ def world_name(
     place_name: str,
     app_name: Annotated[str, Query(alias='appName')],
 ) -> str:
-    world = request.app.state.world_catalog.resolve_place(app_name, place_name)
-    if world is None:
+    resolved = request.app.state.world_catalog.resolve_place(app_name, place_name)
+    if resolved is None:
         raise HTTPException(404, 'World place not found')
+
+    world, _ = resolved
     return world.name

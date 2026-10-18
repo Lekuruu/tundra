@@ -40,6 +40,7 @@ def create_world() -> World:
         name='clubpenguin_town',
         width=64,
         height=40,
+        presentation=create_place_presentation(),
     )
     world.add_place(place)
     world.set_entry_place(place.place_id, object_id=TOWN_PLACE_OBJECT_ID)
@@ -48,8 +49,9 @@ def create_world() -> World:
 def create_world_catalog() -> WorldCatalog:
     catalog = WorldCatalog()
     world = catalog.add_world(create_world())
-    catalog.map_place('clubpenguin', 'clubpenguin_town_en_US', world)
-    catalog.map_place('clubpenguin', 'clubpenguin_town_en_3', world)
+    place = world.require_place(TOWN_PLACE_ID)
+    catalog.map_place('clubpenguin', 'clubpenguin_town_en_US', world, place)
+    catalog.map_place('clubpenguin', 'clubpenguin_town_en_3', world, place)
     return catalog
 
 def create_place_presentation() -> PlacePresentation:

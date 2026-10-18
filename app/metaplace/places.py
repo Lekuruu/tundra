@@ -1,8 +1,11 @@
 
 from dataclasses import dataclass, field
-
-from .world import Place, PlaceInstance
-from .constants import InputModifier, InputTarget, InputType, ViewMode
+from .constants import (
+    InputModifier,
+    InputTarget,
+    InputType,
+    ViewMode
+)
 
 @dataclass(slots=True)
 class MapBlocks:
@@ -95,8 +98,6 @@ __all__ = (
     'InputBinding',
     'MapBlocks',
     'Physics',
-    'Place',
-    'PlaceInstance',
     'PlacePresentation',
     'Render',
 )

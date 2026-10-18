@@ -2,6 +2,8 @@
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 
+from .places import PlacePresentation
+
 Identifier = int | str
 
 @dataclass(frozen=True, slots=True)
@@ -83,6 +85,7 @@ class Place:
     load_type: bool = False
     read_mode: bool = False
     persistent: bool = True
+    presentation: PlacePresentation = field(default_factory=PlacePresentation)
 
     _instances: dict[str, PlaceInstance] = field(
         default_factory=dict,
@@ -201,7 +204,7 @@ class WorldCatalog:
 
     def __init__(self) -> None:
         self._worlds: dict[str, World] = {}
-        self._place_routes: dict[tuple[str, str], str] = {}
+        self._place_routes: dict[tuple[str, str], tuple[str, str]] = {}
 
     @property
     def worlds(self) -> tuple[World, ...]:
@@ -217,16 +220,34 @@ class WorldCatalog:
     def get_world(self, name: str) -> World | None:
         return self._worlds.get(name)
 
-    def map_place(self, product_name: str, place_name: str, world: World) -> None:
+    def map_place(
+        self,
+        product_name: str,
+        place_name: str,
+        world: World,
+        place: Place,
+    ) -> None:
         if self.get_world(world.name) is not world:
             raise ValueError('World must be registered before mapping a place')
 
-        self._place_routes[(product_name, place_name)] = world.name
+        if world.get_place(place.place_id) is not place:
+            raise ValueError('Place must belong to the mapped world')
 
-    def resolve_place(self, product_name: str, place_name: str) -> World | None:
-        world_name = self._place_routes.get((product_name, place_name))
+        self._place_routes[(product_name, place_name)] = (world.name, place.place_id)
 
-        if world_name is None:
+    def resolve_place(self, product_name: str, place_name: str) -> tuple[World, Place] | None:
+        route = self._place_routes.get((product_name, place_name))
+
+        if route is None:
             return None
 
-        return self.get_world(world_name)
+        world_name, place_id = route
+        world = self.get_world(world_name)
+        if world is None:
+            return None
+
+        place = world.get_place(place_id)
+        if place is None:
+            return None
+
+        return world, place
