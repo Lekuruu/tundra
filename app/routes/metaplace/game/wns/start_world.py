@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 
 import config
 from app import security
-from app.protocols.metaplace import World
+from app.metaplace import World
 
 router = APIRouter()
 
