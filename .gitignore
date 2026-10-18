@@ -163,3 +163,7 @@ cython_debug/
 *.key
 *.crt
 *.pem
+
+# Research notes & temporary tests
+research/
+tests/

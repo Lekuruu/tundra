@@ -3,7 +3,7 @@ from redis import Redis
 from starlette.authentication import requires
 
 from app.data import Penguin, items, penguins
-from app.dependencies import DatabaseSession
+from app.api_dependencies import DatabaseSession
 from app.models import Items, Outfit, OutfitPayload, PlayerCardData, PlayerCardOutfit
 
 router = APIRouter()

@@ -1,7 +1,5 @@
 
-from app.data import Penguin
-from typing import Union
-
+from typing import TYPE_CHECKING, Union
 from secrets import token_hex
 from hashlib import md5
 
@@ -9,10 +7,13 @@ import config
 import time
 import jwt
 
+if TYPE_CHECKING:
+    from app.data import Penguin
+
 def generate_random_key():
     return token_hex(8)
 
-def generate_token(user: Penguin) -> str:
+def generate_token(user: "Penguin") -> str:
     return jwt.encode(
         {
             'id': user.id,

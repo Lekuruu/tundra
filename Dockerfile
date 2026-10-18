@@ -13,9 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 VOLUME /app
 
-# Expose the port the app runs on
-ARG WEB_PORT
-EXPOSE $WEB_PORT
+# Expose the ports used by the API and world server
+ARG WEB_PORT=80
+ARG METAPLACE_PORT=7003
+EXPOSE $WEB_PORT $METAPLACE_PORT
 
-# Run app.py when the container launches
-CMD ["python", "main.py"]
+# Select `api` or `world` through the container command
+ENTRYPOINT ["python", "main.py"]
+CMD ["api"]

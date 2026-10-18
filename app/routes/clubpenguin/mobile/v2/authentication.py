@@ -3,9 +3,9 @@ from datetime import datetime
 from fastapi import APIRouter, Request
 from starlette.authentication import requires
 
-from app import crypto
+from app import security
 from app.data import Penguin, logins
-from app.dependencies import DatabaseSession
+from app.api_dependencies import DatabaseSession
 from app.models import AuthData
 
 router = APIRouter()
@@ -26,7 +26,7 @@ def authtoken(
         recent_login = login.date
 
     # Generate new token
-    token = crypto.generate_token(user)
+    token = security.generate_token(user)
 
     return AuthData(
         playerId=user.id,

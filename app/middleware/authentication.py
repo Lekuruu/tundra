@@ -2,7 +2,6 @@
 from collections.abc import Callable
 from typing import TypeVar
 from sqlalchemy.orm import Session
-from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
 from starlette.authentication import (
     AuthCredentials,
@@ -11,7 +10,7 @@ from starlette.authentication import (
 )
 
 from app.data import CELLOPHANE_TOKENS, Penguin, penguins
-from app import api, crypto
+from app import security
 
 import asyncio
 import config
@@ -77,8 +76,8 @@ class AuthBackend(AuthenticationBackend):
         if not penguin:
             return
 
-        login_hash = crypto.get_login_hash(
-            crypto.get_hash(password).upper(),
+        login_hash = security.get_login_hash(
+            security.get_hash(password).upper(),
             config.STATIC_KEY
         )
 
@@ -98,7 +97,7 @@ class AuthBackend(AuthenticationBackend):
         request: HTTPConnection,
         token: str,
     ) -> Penguin | None:
-        data = crypto.decode_token(token)
+        data = security.decode_token(token)
 
         if not data:
             return
@@ -139,5 +138,3 @@ class AuthBackend(AuthenticationBackend):
     ) -> Penguin | None:
         with request.app.state.database.managed_session() as session:
             return fetch(session, key)
-
-api.add_middleware(AuthenticationMiddleware, backend=AuthBackend())

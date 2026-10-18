@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Request
 from starlette.authentication import requires
 
-from app import crypto
+from app import security
 from app.data import Penguin, SystemLanguage
 from app.models import MPTokenResponse
 
@@ -19,4 +19,4 @@ def mp_session_token(
 ) -> MPTokenResponse:
     # TODO: Use same format as dash perhaps ?
     user: Penguin = request.user
-    return MPTokenResponse(mpSessionToken=crypto.generate_token(user))
+    return MPTokenResponse(mpSessionToken=security.generate_token(user))

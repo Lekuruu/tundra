@@ -5,7 +5,7 @@ from starlette.authentication import requires
 
 from app.data import Penguin, SystemLanguage
 from app.data.repositories import penguins
-from app.dependencies import DatabaseSession
+from app.api_dependencies import DatabaseSession
 from app.models import Identity
 
 router = APIRouter()
